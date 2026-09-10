@@ -6,23 +6,43 @@ services:
       POSTGRES_USER: psparts
       POSTGRES_PASSWORD: local_password
     ports:
-      - "127.0.0.1:5432:5432"
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U psparts -d psparts"]
+      test: ['CMD-SHELL', 'pg_isready -U psparts -d psparts']
       interval: 5s
       timeout: 5s
       retries: 10
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_SENTRY_TEST_ENABLED: ${VITE_SENTRY_TEST_ENABLED:-false}
     environment:
       NODE_ENV: production
-      PORT: "3000"
+      PORT: '3000'
       DATABASE_URL: postgresql://psparts:local_password@db:5432/psparts
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
+      SENTRY_TEST_ENABLED: ${SENTRY_TEST_ENABLED:-false}
+    init: true
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health-check').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     ports:
-      - "3000:3000"
+      - '127.0.0.1:${APP_PORT:-3000}:3000'
     depends_on:
       db:
         condition: service_healthy

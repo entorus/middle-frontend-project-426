@@ -2,6 +2,8 @@
   "name": "psparts",
   "private": true,
   "scripts": {
+    "build": "npm --prefix apps/front run build && npm --prefix apps/api run build",
+    "test:smoke": "node scripts/smoke.mjs",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
@@ -13,6 +15,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.12.0",
     "prettier": "^3.9.6",
     "typescript-eslint": "^8.70.0"

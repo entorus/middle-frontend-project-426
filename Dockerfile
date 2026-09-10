@@ -4,7 +4,9 @@ WORKDIR /app/apps/front
 COPY apps/front/package*.json ./
 RUN npm ci
 COPY apps/front/ ./
-RUN npm run build
+ARG VITE_SENTRY_DSN
+ARG VITE_SENTRY_TEST_ENABLED=false
+RUN VITE_SENTRY_DSN="$VITE_SENTRY_DSN" VITE_SENTRY_TEST_ENABLED="$VITE_SENTRY_TEST_ENABLED" npm run build
 
 WORKDIR /app/apps/api
 COPY apps/api/package*.json ./

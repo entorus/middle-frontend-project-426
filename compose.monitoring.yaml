@@ -1,0 +1,21 @@
+# Local monitoring smoke test only. DSNs point exclusively to this receiver.
+services:
+  app:
+    build:
+      args:
+        VITE_SENTRY_DSN: http://local@localhost:4318/2
+        VITE_SENTRY_TEST_ENABLED: 'true'
+    environment:
+      SENTRY_DSN: http://local@sentry-local:4318/1
+      SENTRY_ENVIRONMENT: local-test
+      SENTRY_TEST_ENABLED: 'true'
+    depends_on:
+      sentry-local:
+        condition: service_started
+  sentry-local:
+    image: node:24-bookworm-slim
+    command: ['node', '/test/sentry-local.mjs']
+    volumes:
+      - ./scripts/sentry-local.mjs:/test/sentry-local.mjs:ro
+    ports:
+      - '127.0.0.1:4318:4318'
