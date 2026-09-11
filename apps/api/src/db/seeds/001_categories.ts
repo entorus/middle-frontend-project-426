@@ -1,4 +1,4 @@
-import type { Knex } from 'knex';
+import type { Knex } from 'knex'
 
 export async function seed(db: Knex): Promise<void> {
   await db('categories')
@@ -7,5 +7,5 @@ export async function seed(db: Knex): Promise<void> {
       { slug: 'graphics-cards', name: 'Видеокарты' },
     ])
     .onConflict('slug')
-    .ignore();
+    .ignore()
 }

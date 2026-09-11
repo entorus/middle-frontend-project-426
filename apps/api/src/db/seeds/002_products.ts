@@ -1,12 +1,12 @@
-import type { Knex } from 'knex';
+import type { Knex } from 'knex'
 
 export async function seed(db: Knex): Promise<void> {
-  const categories = await db('categories').select('id', 'slug');
+  const categories = await db('categories').select('id', 'slug')
   const categoryId = (slug: string): number => {
-    const category = categories.find((item) => item.slug === slug);
-    if (!category) throw new Error(`Не найдена категория ${slug}`);
-    return category.id;
-  };
+    const category = categories.find((item) => item.slug === slug)
+    if (!category) throw new Error(`Не найдена категория ${slug}`)
+    return category.id
+  }
   await db('products')
     .insert([
       {
@@ -53,5 +53,5 @@ export async function seed(db: Knex): Promise<void> {
       },
     ])
     .onConflict('sku')
-    .ignore();
+    .ignore()
 }

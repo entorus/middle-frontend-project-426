@@ -2,6 +2,10 @@
   "name": "psparts",
   "private": true,
   "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
     "build": "npm --prefix apps/front run build && npm --prefix apps/api run build",
     "test:smoke": "node scripts/smoke.mjs",
     "lint": "eslint . --max-warnings=0",
@@ -11,6 +15,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.63.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",

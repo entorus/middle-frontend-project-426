@@ -1,11 +1,11 @@
-import { resolve } from 'node:path';
+import { resolve } from 'node:path'
 
-import knex from 'knex';
+import knex from 'knex'
 
-const connection = process.env.DATABASE_URL;
+const connection = process.env.DATABASE_URL
 
 if (!connection) {
-  throw new Error('Переменная DATABASE_URL не задана');
+  throw new Error('Переменная DATABASE_URL не задана')
 }
 
 export const db = knex({
@@ -20,4 +20,4 @@ export const db = knex({
     directory: resolve(__dirname, 'seeds'),
     loadExtensions: ['.js'],
   },
-});
+})

@@ -1,8 +1,18 @@
 name: Quality
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   check:
+    name: Build and browser tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_URL: http://127.0.0.1:3000
+      SENTRY_DSN: ''
+      VITE_SENTRY_DSN: ''
+      SENTRY_TEST_ENABLED: 'false'
+      VITE_SENTRY_TEST_ENABLED: 'false'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -14,10 +24,23 @@ jobs:
             apps/api/package-lock.json
             apps/front/package-lock.json
       - run: npm ci && npm --prefix apps/api ci && npm --prefix apps/front ci
+      - run: npx playwright install --with-deps chromium
       - run: npm run lint && npm run format:check && npm run build
       - run: docker compose up --build -d --wait --wait-timeout 180
       - run: npm run test:smoke
       - run: docker compose exec -T app node dist/db/prepare.js && npm run test:smoke
+      - name: Browser smoke tests
+        run: npm run test:e2e
+      - name: Upload Playwright report and failure traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
       - if: always()
         run: docker compose logs --tail=100
       - if: always()

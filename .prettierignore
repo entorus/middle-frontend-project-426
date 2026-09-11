@@ -2,4 +2,7 @@
 **/dist/
 **/build/
 **/coverage/
+**/playwright-report/
+**/test-results/
+**/blob-report/
 **/package-lock.json

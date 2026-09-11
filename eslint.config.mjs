@@ -1,12 +1,22 @@
-import js from '@eslint/js';
-import prettier from 'eslint-config-prettier/flat';
-import importPlugin from 'eslint-plugin-import';
-import reactHooks from 'eslint-plugin-react-hooks';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import js from '@eslint/js'
+import prettier from 'eslint-config-prettier/flat'
+import importPlugin from 'eslint-plugin-import'
+import reactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/coverage/**'] },
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/coverage/**',
+      '**/playwright-report/**',
+      '**/test-results/**',
+      '**/blob-report/**',
+    ],
+  },
   js.configs.recommended,
   tseslint.configs.recommended,
   {
@@ -68,4 +78,10 @@ export default tseslint.config(
     },
   },
   prettier,
-);
+  {
+    files: ['**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}'],
+    rules: {
+      semi: ['error', 'never'],
+    },
+  },
+)

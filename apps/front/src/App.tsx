@@ -1,67 +1,67 @@
-import { useEffect, useState } from 'react';
-import { Link, Route, Routes, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { Link, Route, Routes, useSearchParams } from 'react-router-dom'
 
 interface Category {
-  id: number;
-  slug: string;
-  name: string;
+  id: number
+  slug: string
+  name: string
 }
 interface Product {
-  id: number;
-  sku: string;
-  name: string;
-  description: string;
-  price_kopecks: number;
-  category_slug: string;
-  category_name: string;
+  id: number
+  sku: string
+  name: string
+  description: string
+  price_kopecks: number
+  category_slug: string
+  category_name: string
 }
 
 const currency = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
   currency: 'RUB',
   maximumFractionDigits: 0,
-});
+})
 
 function Catalog() {
-  const [params, setParams] = useSearchParams();
-  const selected = params.get('category') ?? '';
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [attempt, setAttempt] = useState(0);
+  const [params, setParams] = useSearchParams()
+  const selected = params.get('category') ?? ''
+  const [categories, setCategories] = useState<Category[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
-    const controller = new AbortController();
+    const controller = new AbortController()
     async function load() {
-      setStatus('loading');
+      setStatus('loading')
       try {
         const responses = await Promise.all([
           fetch('/api/categories', { signal: controller.signal }),
           fetch('/api/products', { signal: controller.signal }),
-        ]);
-        if (responses.some((response) => !response.ok)) throw new Error('Каталог недоступен');
+        ])
+        if (responses.some((response) => !response.ok)) throw new Error('Каталог недоступен')
         const [categoryData, productData] = await Promise.all(
           responses.map((response) => response.json()),
-        );
+        )
         if (!controller.signal.aborted) {
-          setCategories(categoryData);
-          setProducts(productData);
-          setStatus('ready');
+          setCategories(categoryData)
+          setProducts(productData)
+          setStatus('ready')
         }
       } catch {
-        if (!controller.signal.aborted) setStatus('error');
+        if (!controller.signal.aborted) setStatus('error')
       }
     }
-    void load();
-    return () => controller.abort();
-  }, [attempt]);
+    void load()
+    return () => controller.abort()
+  }, [attempt])
 
-  const visible = products.filter((product) => !selected || product.category_slug === selected);
+  const visible = products.filter((product) => !selected || product.category_slug === selected)
   return (
     <>
       <section className="hero">
         <p className="eyebrow">КОМПЛЕКТУЮЩИЕ ДЛЯ ПК</p>
-        <h1>
+        <h1 data-testid="app-title">
           Ваш следующий
           <br />
           апгрейд — здесь.
@@ -71,7 +71,7 @@ function Catalog() {
         </p>
         <span className="demo-note">Учебный каталог · демонстрационные цены</span>
       </section>
-      <section aria-labelledby="catalog-title">
+      <section aria-labelledby="catalog-title" data-testid="catalog">
         <div className="section-heading">
           <h2 id="catalog-title">Каталог</h2>
           <span>{status === 'ready' ? `${visible.length} товаров` : 'Загрузка каталога'}</span>
@@ -84,6 +84,7 @@ function Catalog() {
             <button
               type="button"
               key={category.id}
+              data-testid={`category-${category.slug}`}
               aria-pressed={selected === category.slug}
               onClick={() => setParams({ category: category.slug })}
             >
@@ -93,7 +94,7 @@ function Catalog() {
         </div>
         {status === 'loading' && <p role="status">Загружаем товары…</p>}
         {status === 'error' && (
-          <div role="alert">
+          <div role="alert" data-testid="catalog-error">
             <p>Не удалось загрузить каталог. Попробуйте ещё раз.</p>
             <button type="button" onClick={() => setAttempt((value) => value + 1)}>
               Повторить
@@ -104,7 +105,12 @@ function Catalog() {
         <div className="product-grid">
           {status === 'ready' &&
             visible.map((product) => (
-              <article className="product" key={product.id}>
+              <article
+                className="product"
+                key={product.id}
+                data-testid="product-card"
+                data-category={product.category_slug}
+              >
                 <div className="component-art" aria-hidden="true">
                   <span>{product.category_slug === 'processors' ? 'CPU' : 'GPU'}</span>
                   <i />
@@ -123,7 +129,7 @@ function Catalog() {
         </div>
       </section>
     </>
-  );
+  )
 }
 
 function MonitoringTest() {
@@ -133,13 +139,13 @@ function MonitoringTest() {
       <button
         type="button"
         onClick={() => {
-          throw new Error('Frontend monitoring smoke test');
+          throw new Error('Frontend monitoring smoke test')
         }}
       >
         Отправить тестовую ошибку фронтенда
       </button>
     </section>
-  );
+  )
 }
 
 export default function App() {
@@ -150,7 +156,9 @@ export default function App() {
           PS<span> / </span>PARTS
         </Link>
         <nav>
-          <Link to="/catalog">Каталог комплектующих ↗</Link>
+          <Link to="/catalog" data-testid="catalog-link">
+            Каталог комплектующих ↗
+          </Link>
         </nav>
       </header>
       <main>
@@ -176,5 +184,5 @@ export default function App() {
         <span>Учебный проект · React + Fastify + PostgreSQL</span>
       </footer>
     </div>
-  );
+  )
 }

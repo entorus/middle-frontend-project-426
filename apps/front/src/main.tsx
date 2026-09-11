@@ -1,14 +1,14 @@
-import './instrument';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
+import './instrument'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
 
-import App from './App';
-import './style.css';
+import App from './App'
+import './style.css'
 
-const root = document.getElementById('root');
-if (!root) throw new Error('Не найден корневой элемент приложения');
+const root = document.getElementById('root')
+if (!root) throw new Error('Не найден корневой элемент приложения')
 
 createRoot(root).render(
   <StrictMode>
@@ -20,4 +20,4 @@ createRoot(root).render(
       </BrowserRouter>
     </Sentry.ErrorBoundary>
   </StrictMode>,
-);
+)
