@@ -24,6 +24,8 @@ jobs:
             apps/api/package-lock.json
             apps/front/package-lock.json
       - run: npm ci && npm --prefix apps/api ci && npm --prefix apps/front ci
+      - run: npm run contract:check
+      - run: npm run test:contract
       - run: npx playwright install --with-deps chromium
       - run: npm run lint && npm run format:check && npm run build
       - run: docker compose up --build -d --wait --wait-timeout 180

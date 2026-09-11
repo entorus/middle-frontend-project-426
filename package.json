@@ -2,6 +2,11 @@
   "name": "psparts",
   "private": true,
   "scripts": {
+    "openapi:generate": "tsp compile . --warn-as-error",
+    "contract:generate": "npm run openapi:generate && node scripts/generate-contract.mjs",
+    "contract:check": "npm run contract:generate && git diff --exit-code -- openapi/openapi.yaml apps/api/src/generated apps/front/src/generated",
+    "test:contract": "npm --prefix apps/api run build && node --test tests/contract/*.test.mjs",
+    "typespec:format": "tsp format main.tsp",
     "test": "playwright test",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -14,14 +19,20 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^13.0.0",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.63.0",
+    "@typespec/compiler": "^1.16.0",
+    "@typespec/http": "^1.16.0",
+    "@typespec/openapi": "^1.16.0",
+    "@typespec/openapi3": "^1.16.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.12.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.6",
     "typescript-eslint": "^8.70.0"
   }

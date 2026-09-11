@@ -37,10 +37,19 @@ assert.ok(products.length >= 6)
 assert.equal(new Set(products.map((product) => product.sku)).size, products.length)
 assert.ok(
   products.every(
-    (product) => Number.isInteger(product.price_kopecks) && product.price_kopecks >= 0,
+    (product) =>
+      Number.isInteger(product.price.amount) &&
+      product.price.amount >= 0 &&
+      product.price.currency === 'RUB',
   ),
 )
 await request('/api/debug-sentry', process.env.EXPECT_SENTRY_TEST === 'true' ? 500 : 404)
+await request('/api/products?category=invalid!', 400)
+await request('/api/products?category=unknown-category', 404)
+const filtered = await (await request('/api/products?category=processors')).json()
+assert.ok(
+  filtered.length > 0 && filtered.every((product) => product.category_slug === 'processors'),
+)
 process.stdout.write(
   `Smoke OK: SPA, API 404, static 404, ${categories.length} categories, ${products.length} products\n`,
 )

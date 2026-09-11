@@ -1,20 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, Route, Routes, useSearchParams } from 'react-router-dom'
 
-interface Category {
-  id: number
-  slug: string
-  name: string
-}
-interface Product {
-  id: number
-  sku: string
-  name: string
-  description: string
-  price_kopecks: number
-  category_slug: string
-  category_name: string
-}
+import type { components } from './generated/api'
+
+type Category = components['schemas']['Category']
+type Product = components['schemas']['Product']
 
 const currency = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
@@ -40,9 +30,10 @@ function Catalog() {
           fetch('/api/products', { signal: controller.signal }),
         ])
         if (responses.some((response) => !response.ok)) throw new Error('Каталог недоступен')
-        const [categoryData, productData] = await Promise.all(
-          responses.map((response) => response.json()),
-        )
+        const [categoryData, productData] = await Promise.all([
+          responses[0].json() as Promise<Category[]>,
+          responses[1].json() as Promise<Product[]>,
+        ])
         if (!controller.signal.aborted) {
           setCategories(categoryData)
           setProducts(productData)
@@ -121,7 +112,7 @@ function Catalog() {
                 <h3>{product.name}</h3>
                 <p className="description">{product.description}</p>
                 <div className="product-bottom">
-                  <strong>{currency.format(product.price_kopecks / 100)}</strong>
+                  <strong>{currency.format(product.price.amount / 100)}</strong>
                   <span>{product.sku}</span>
                 </div>
               </article>

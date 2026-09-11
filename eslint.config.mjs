@@ -15,6 +15,7 @@ export default tseslint.config(
       '**/playwright-report/**',
       '**/test-results/**',
       '**/blob-report/**',
+      '**/src/generated/**',
     ],
   },
   js.configs.recommended,
@@ -55,7 +56,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/api/**/*.{js,cjs,mjs,ts,cts,mts}', 'scripts/*.mjs', '*.config.{js,cjs,mjs}'],
+    files: [
+      'apps/api/**/*.{js,cjs,mjs,ts,cts,mts}',
+      'scripts/*.mjs',
+      'tests/contract/*.mjs',
+      '*.config.{js,cjs,mjs}',
+    ],
     languageOptions: { globals: globals.node },
   },
   {

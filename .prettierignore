@@ -6,3 +6,6 @@
 **/test-results/
 **/blob-report/
 **/package-lock.json
+openapi/
+**/*.tsp
+**/src/generated/

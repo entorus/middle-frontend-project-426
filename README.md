@@ -128,6 +128,61 @@ GitHub workflow `quality.yml` проверяет линтер, сборку, к�
 
 ## Проверка и форматирование кода
 
+### TypeSpec → OpenAPI
+
+Из корня репозитория:
+
+```bash
+npm ci
+npm run contract:generate
+```
+
+Источник контракта — `main.tsp`, настройки генератора — `tspconfig.yaml`.
+Результат — `openapi/openapi.yaml` (OpenAPI 3.1.0). Файл генерируется автоматически:
+изменяйте TypeSpec и повторяйте команду, не редактируйте YAML вручную.
+Для форматирования TypeSpec: `npm run typespec:format`.
+Обязательные точки с запятой в TypeSpec сохраняются: правило JS/TS `semi: never` на него не распространяется.
+
+Описаны текущие `/health-check`, `/api/categories`, `/api/products` и общие модели `Money` и `ApiError`.
+`Money` — `{ amount: 1999000, currency: "RUB" }`: неотрицательное целое количество копеек
+в пределах int32. В API товар теперь содержит `price: Money` вместо `price_kopecks`;
+в БД по-прежнему хранится `price_kopecks`, сервер преобразует его на границе API.
+`ApiError` — `{ statusCode, error, message }`, для некорректного запроса возвращается 400,
+неизвестной категории — 404, внутреннего сбоя — 500 без технических подробностей в ответе.
+
+Цепочка единого источника правды:
+
+```text
+main.tsp → openapi/openapi.yaml
+         → apps/api/src/generated/schemas.ts
+         → apps/api/src/generated/api.d.ts
+         → apps/front/src/generated/api.d.ts
+```
+
+`openapi-typescript` генерирует типы, `scripts/generate-contract.mjs` проверяет OpenAPI через
+Swagger Parser, разрешает ссылки и извлекает JSON Schema из операций. OpenAPI 3.1 позволяет
+использовать JSON Schema 2020-12 напрямую. Ajv в Fastify проверяет параметры запросов
+и ответы; ручные интерфейсы Category/Product на фронтенде заменены сгенерированными типами.
+Генератор поддерживает JSON body/response и query/path/header параметры; другие форматы
+нужно явно добавить в генератор, а не описывать второй контракт вручную.
+
+```bash
+npm run openapi:generate # только OpenAPI
+npm run contract:generate # OpenAPI + backend schemas + types
+npm run contract:check # регенерация и сравнение с закоммиченными артефактами
+npm run test:contract # негативные тесты Money, ошибок и Fastify-валидации
+```
+
+Все файлы `generated` и OpenAPI коммитятся вместе с TypeSpec. Их не правят руками и не
+форматируют отдельно: генератор сам применяет стиль проекта. CI проверяет актуальность
+артефактов до сборки. Изменение API начинайте с `main.tsp`, затем генерируйте, адаптируйте
+обработчики и интерфейс, запускайте проверки и коммитьте весь результат.
+
+Фильтр товаров: `GET /api/products?category=processors`. Slug проверяется по схеме;
+допустимы строчные латинские буквы, цифры и дефисы между группами, длина 1–100.
+Статические страницы и условный тестовый маршрут Sentry не входят в публичный API-контракт.
+Генерация не требует запущенного сервера, PostgreSQL или `DATABASE_URL` и выполняется отдельно от сборки приложения.
+
 ### Браузерные тесты
 
 Playwright запускает Chromium против уже работающего приложения; перед тестами
