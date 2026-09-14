@@ -1,5 +1,5 @@
 {
-  "name": "psparts-front",
+  "name": "@hexlet/code-front",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,5 +1,5 @@
 {
-  "name": "psparts",
+  "name": "@hexlet/code",
   "private": true,
   "scripts": {
     "openapi:generate": "tsp compile . --warn-as-error",
