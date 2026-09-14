@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import type { components } from './generated/api'
 
@@ -42,6 +42,7 @@ type CartState = {
   add: (id: number) => Promise<void>
   setQuantity: (id: number, quantity: number) => void
   remove: (id: number) => void
+  clear: () => void
 }
 const CartContext = createContext<CartState | null>(null)
 
@@ -79,13 +80,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
   const remove = (id: number) => setItems((current) => current.filter((item) => item.id !== id))
   return (
-    <CartContext.Provider value={{ items, storageError, add, setQuantity, remove }}>
+    <CartContext.Provider
+      value={{ items, storageError, add, setQuantity, remove, clear: () => setItems([]) }}
+    >
       {children}
     </CartContext.Provider>
   )
 }
 
-function useCart() {
+export function useCart() {
   const cart = useContext(CartContext)
   if (!cart) throw new Error('CartProvider отсутствует')
   return cart
@@ -212,7 +215,7 @@ function Quantity({ item }: { item: CartItem }) {
   )
 }
 
-export function CartPage({ checkout = false }: { checkout?: boolean }) {
+export function CartPage() {
   const { items, remove, storageError } = useCart()
   const { products, refresh } = useCartProducts(items)
   const ready = items.every((item) => Boolean(products[item.id]))
@@ -222,13 +225,9 @@ export function CartPage({ checkout = false }: { checkout?: boolean }) {
     const product = products[item.id]?.product
     return sum + (product?.available ? product.price.amount * item.quantity : 0)
   }, 0)
-  if (checkout && items.length === 0) return <Navigate to="/cart" replace />
   return (
     <section className="cart-page">
-      <h1>{checkout ? 'Оформление заказа' : 'Корзина'}</h1>
-      {checkout && (
-        <p>Проверьте состав корзины. Создание и отправка заказа появятся на следующем шаге.</p>
-      )}
+      <h1>Корзина</h1>
       {storageError && <p role="alert">{storageError}</p>}
       {items.length === 0 ? (
         <div data-testid="cart-empty">
@@ -300,17 +299,15 @@ export function CartPage({ checkout = false }: { checkout?: boolean }) {
         <p>
           Сумма справочная. Окончательная стоимость будет проверена сервером при оформлении заказа.
         </p>
-        {!checkout &&
-          (valid ? (
-            <Link className="home-catalog-link" to="/checkout" data-testid="cart-checkout">
-              Перейти к оформлению
-            </Link>
-          ) : (
-            <button type="button" data-testid="cart-checkout" disabled>
-              Перейти к оформлению
-            </button>
-          ))}
-        {checkout && <Link to="/cart">Вернуться в корзину</Link>}
+        {valid ? (
+          <Link className="home-catalog-link" to="/checkout" data-testid="cart-checkout">
+            Перейти к оформлению
+          </Link>
+        ) : (
+          <button type="button" data-testid="cart-checkout" disabled>
+            Перейти к оформлению
+          </button>
+        )}
       </div>
     </section>
   )

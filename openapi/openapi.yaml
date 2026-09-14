@@ -82,6 +82,8 @@ paths:
                       - true
                 required:
                   - success
+                unevaluatedProperties:
+                  not: {}
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -149,6 +151,119 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/orders:
+    post:
+      operationId: createOrder
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRejected'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+      security:
+        - ApiKeyAuth: []
+    get:
+      operationId: listOrders
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+        - ApiKeyAuth: []
+  /api/orders/{id}:
+    get:
+      operationId: getOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+        - ApiKeyAuth: []
   /api/products:
     get:
       operationId: listProducts
@@ -348,6 +463,24 @@ components:
           type: string
         name:
           type: string
+      unevaluatedProperties:
+        not: {}
+    CreateOrder:
+      type: object
+      required:
+        - items
+        - receiving
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderInputItem'
+          minItems: 1
+          maxItems: 100
+        receiving:
+          $ref: '#/components/schemas/Receiving'
+      unevaluatedProperties:
+        not: {}
     Credentials:
       type: object
       required:
@@ -363,6 +496,37 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+      unevaluatedProperties:
+        not: {}
+    Delivery:
+      type: object
+      required:
+        - name
+        - phone
+        - method
+        - address
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: \S
+        phone:
+          type: string
+          minLength: 7
+          maxLength: 25
+          pattern: ^(?=(?:\D*\d){7,15}\D*$)\+?[0-9 ()-]{7,25}$
+        method:
+          type: string
+          enum:
+            - delivery
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+          pattern: \S
+      unevaluatedProperties:
+        not: {}
     Health:
       type: object
       required:
@@ -372,6 +536,8 @@ components:
           type: string
           enum:
             - check
+      unevaluatedProperties:
+        not: {}
     Money:
       type: object
       required:
@@ -380,16 +546,141 @@ components:
       properties:
         amount:
           type: integer
-          format: int32
           minimum: 0
+          maximum: 9007199254740991
         currency:
           type: string
           enum:
             - RUB
+      unevaluatedProperties:
+        not: {}
       description: 'Денежная сумма: amount — целое число копеек, currency — RUB.'
       examples:
         - amount: 1999000
           currency: RUB
+    Order:
+      type: object
+      required:
+        - id
+        - status
+        - createdAt
+        - receiving
+        - items
+        - total
+      properties:
+        id:
+          type: integer
+          format: int32
+        status:
+          type: string
+          enum:
+            - paid
+        createdAt:
+          type: string
+          format: date-time
+        receiving:
+          $ref: '#/components/schemas/Receiving'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        total:
+          $ref: '#/components/schemas/Money'
+      unevaluatedProperties:
+        not: {}
+    OrderInputItem:
+      type: object
+      required:
+        - id
+        - quantity
+      properties:
+        id:
+          type: integer
+          format: int32
+          minimum: 1
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 999
+      unevaluatedProperties:
+        not: {}
+    OrderItem:
+      type: object
+      required:
+        - productId
+        - name
+        - quantity
+        - price
+        - total
+      properties:
+        productId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+        price:
+          $ref: '#/components/schemas/Money'
+        total:
+          $ref: '#/components/schemas/Money'
+      unevaluatedProperties:
+        not: {}
+    OrderRejected:
+      type: object
+      required:
+        - products
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProblemProduct'
+      unevaluatedProperties:
+        not: {}
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    Pickup:
+      type: object
+      required:
+        - name
+        - phone
+        - method
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: \S
+        phone:
+          type: string
+          minLength: 7
+          maxLength: 25
+          pattern: ^(?=(?:\D*\d){7,15}\D*$)\+?[0-9 ()-]{7,25}$
+        method:
+          type: string
+          enum:
+            - pickup
+      unevaluatedProperties:
+        not: {}
+    ProblemProduct:
+      type: object
+      required:
+        - id
+        - reason
+      properties:
+        id:
+          type: integer
+          format: int32
+        reason:
+          type: string
+          enum:
+            - not_found
+            - unavailable
+      unevaluatedProperties:
+        not: {}
     Product:
       type: object
       required:
@@ -424,6 +715,8 @@ components:
             - type: 'null'
         available:
           type: boolean
+      unevaluatedProperties:
+        not: {}
     ProductPage:
       type: object
       required:
@@ -453,6 +746,8 @@ components:
           type: integer
           format: int32
           minimum: 0
+      unevaluatedProperties:
+        not: {}
     Promotion:
       type: object
       required:
@@ -472,7 +767,31 @@ components:
           minLength: 1
         product:
           $ref: '#/components/schemas/Product'
+      unevaluatedProperties:
+        not: {}
       description: Промо-блок главной. Товар уникален в подборке и доступен для покупки.
+    Receiving:
+      anyOf:
+        - $ref: '#/components/schemas/Delivery'
+        - $ref: '#/components/schemas/Pickup'
+    Recipient:
+      type: object
+      required:
+        - name
+        - phone
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: \S
+        phone:
+          type: string
+          minLength: 7
+          maxLength: 25
+          pattern: ^(?=(?:\D*\d){7,15}\D*$)\+?[0-9 ()-]{7,25}$
+      unevaluatedProperties:
+        not: {}
     User:
       type: object
       required:
@@ -484,6 +803,8 @@ components:
           format: int32
         email:
           type: string
+      unevaluatedProperties:
+        not: {}
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

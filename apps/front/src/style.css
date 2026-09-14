@@ -454,3 +454,37 @@ button:disabled {
     max-width: 160px;
   }
 }
+.checkout-page {
+  max-width: 640px;
+  margin: 30px auto;
+}
+.checkout-page fieldset {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+}
+.checkout-page input,
+.checkout-page select {
+  padding: 12px;
+  font: inherit;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #a2b189;
+  border-radius: 8px;
+}
+.account-order {
+  padding: 24px;
+  margin: 20px 0;
+  background: white;
+  border: 1px solid #dce0d5;
+  border-radius: 16px;
+}
+.order-items {
+  padding-left: 24px;
+  line-height: 1.8;
+}
+[data-status='paid'] {
+  color: #315421;
+  font-weight: 700;
+}

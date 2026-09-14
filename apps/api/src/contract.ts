@@ -4,11 +4,13 @@ import Ajv2020 from 'ajv/dist/2020'
 import type { FastifyInstance } from 'fastify'
 
 import { modelSchemas } from './generated/schemas'
+import type { components } from './generated/api'
 
 export class HttpError extends Error {
   constructor(
     public readonly statusCode: number,
     message: string,
+    public readonly products?: components['schemas']['ProblemProduct'][],
   ) {
     super(message)
   }
@@ -30,6 +32,7 @@ export function configureContract(app: FastifyInstance) {
   } as const
   ajv.addFormat('int32', int32Format)
   queryAjv.addFormat('int32', int32Format)
+  ajv.addFormat('date-time', (value: string) => Number.isFinite(Date.parse(value)))
   const validateError = ajv.compile(modelSchemas.ApiError)
   app.setValidatorCompiler(({ schema, httpPart }) =>
     (httpPart === 'querystring' || httpPart === 'params' ? queryAjv : ajv).compile(schema),
@@ -54,6 +57,7 @@ export function configureContract(app: FastifyInstance) {
       statusCode,
       error: STATUS_CODES[statusCode] ?? 'Error',
       message,
+      ...(error instanceof HttpError && error.products ? { products: error.products } : {}),
     }
     if (!validateError(body)) throw new Error('Некорректный формат ошибки API')
     reply.code(statusCode).send(body)

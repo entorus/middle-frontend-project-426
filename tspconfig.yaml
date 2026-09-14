@@ -2,6 +2,7 @@ emit:
   - '@typespec/openapi3'
 options:
   '@typespec/openapi3':
+    seal-object-schemas: true
     emitter-output-dir: '{project-root}/openapi'
     output-file: openapi.yaml
     openapi-versions:

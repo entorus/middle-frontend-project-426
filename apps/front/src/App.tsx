@@ -1,9 +1,10 @@
 import { Link, Route, Routes } from 'react-router-dom'
 
-import { Account, AuthForm, AuthNavigation } from './auth'
+import { AuthForm, AuthNavigation } from './auth'
 import { Catalog, ProductDetail } from './catalog'
 import Home from './Home'
 import { CartNavigation, CartPage } from './cart'
+import { AccountOrders, Checkout, OrderSuccess, RequireAuth } from './orders'
 
 function MonitoringTest() {
   return (
@@ -40,11 +41,33 @@ export default function App() {
         <Routes>
           <Route path="/signup" element={<AuthForm key="signup" mode="signup" />} />
           <Route path="/signin" element={<AuthForm key="signin" mode="signin" />} />
-          <Route path="/account/*" element={<Account />} />
+          <Route
+            path="/account/*"
+            element={
+              <RequireAuth>
+                <AccountOrders />
+              </RequireAuth>
+            }
+          />
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CartPage key="checkout" checkout />} />
+          <Route
+            path="/checkout"
+            element={
+              <RequireAuth checkout>
+                <Checkout />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/orders/:id/success"
+            element={
+              <RequireAuth>
+                <OrderSuccess />
+              </RequireAuth>
+            }
+          />
           <Route path="/products/:id" element={<ProductDetail />} />
           {import.meta.env.VITE_SENTRY_TEST_ENABLED === 'true' && (
             <Route path="/monitoring-test" element={<MonitoringTest />} />

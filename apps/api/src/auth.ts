@@ -34,6 +34,40 @@ function setCookie(reply: FastifyReply, value: string, maxAge: number) {
   )
 }
 
+export function validateOrigin(request: FastifyRequest) {
+  if (request.method !== 'POST') return
+  const origin = request.headers.origin
+  // Origin is supplied by browsers; API clients without it are also supported.
+  if (request.headers['sec-fetch-site'] === 'cross-site')
+    throw new HttpError(400, 'Недопустимый источник запроса')
+  if (origin) {
+    let valid = false
+    try {
+      const parsed = new URL(origin)
+      valid = process.env.APP_ORIGIN
+        ? origin === process.env.APP_ORIGIN
+        : parsed.host === request.headers.host && ['http:', 'https:'].includes(parsed.protocol)
+    } catch {
+      /* Invalid Origin is rejected below. */
+    }
+    if (!valid) throw new HttpError(400, 'Недопустимый источник запроса')
+  }
+}
+
+export async function requireUser(db: Knex, request: FastifyRequest): Promise<User> {
+  const hash = sessionHash(request)
+  const user = hash
+    ? await db('sessions')
+        .join('users', 'users.id', 'sessions.user_id')
+        .where('token_hash', hash)
+        .where('expires_at', '>', new Date())
+        .select('users.id', 'users.email')
+        .first<User>()
+    : undefined
+  if (!user) throw new HttpError(401, 'Необходимо войти в аккаунт')
+  return user
+}
+
 export function registerAuth(app: FastifyInstance, db: Knex) {
   // Equal-cost password check even when the account does not exist.
   const dummyHash = hashPassword(randomBytes(32).toString('hex'))
@@ -53,23 +87,7 @@ export function registerAuth(app: FastifyInstance, db: Knex) {
   app.register(async (auth) => {
     auth.addHook('onRequest', async (request, reply) => {
       reply.header('cache-control', 'no-store')
-      if (request.method !== 'POST') return
-      const origin = request.headers.origin
-      // Origin is supplied by browsers; API clients without it are also supported.
-      if (request.headers['sec-fetch-site'] === 'cross-site')
-        throw new HttpError(400, 'Недопустимый источник запроса')
-      if (origin) {
-        let valid = false
-        try {
-          const parsed = new URL(origin)
-          valid = process.env.APP_ORIGIN
-            ? origin === process.env.APP_ORIGIN
-            : parsed.host === request.headers.host && ['http:', 'https:'].includes(parsed.protocol)
-        } catch {
-          /* Invalid Origin is rejected below. */
-        }
-        if (!valid) throw new HttpError(400, 'Недопустимый источник запроса')
-      }
+      validateOrigin(request)
     })
 
     auth.post<{ Body: Credentials }>(
@@ -129,17 +147,7 @@ export function registerAuth(app: FastifyInstance, db: Knex) {
     })
 
     auth.get('/api/auth/me', { schema: routeSchemas.currentUser }, async (request) => {
-      const hash = sessionHash(request)
-      const user = hash
-        ? await db('sessions')
-            .join('users', 'users.id', 'sessions.user_id')
-            .where('token_hash', hash)
-            .where('expires_at', '>', new Date())
-            .select('users.id', 'users.email')
-            .first<User>()
-        : undefined
-      if (!user) throw new HttpError(401, 'Необходимо войти в аккаунт')
-      return user
+      return requireUser(db, request)
     })
   })
 }

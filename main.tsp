@@ -70,7 +70,8 @@ model Category {
 @example(#{ amount: 1999000, currency: "RUB" })
 model Money {
   @minValue(0)
-  amount: int32;
+  @maxValue(9007199254740991)
+  amount: integer;
 
   currency: "RUB";
 }
@@ -191,3 +192,105 @@ op listProducts(
 @route("/api/products/{id}")
 @get
 op getProduct(@minValue(1) @path id: int32): Product | BadRequest | NotFound | ServerError;
+
+model OrderInputItem {
+  @minValue(1) id: int32;
+  @minValue(1) @maxValue(999) quantity: int32;
+}
+
+model Recipient {
+  @minLength(1)
+  @maxLength(100)
+  @pattern("\\S")
+  name: string;
+
+  @minLength(7)
+  @maxLength(25)
+  @pattern("^(?=(?:\\D*\\d){7,15}\\D*$)\\+?[0-9 ()-]{7,25}$")
+  phone: string;
+}
+
+model Delivery {
+  ...Recipient;
+  method: "delivery";
+
+  @minLength(1)
+  @maxLength(500)
+  @pattern("\\S")
+  address: string;
+}
+
+model Pickup {
+  ...Recipient;
+  method: "pickup";
+}
+
+union Receiving {
+  Delivery,
+  Pickup,
+}
+
+model CreateOrder {
+  @minItems(1) @maxItems(100) items: OrderInputItem[];
+  receiving: Receiving;
+}
+
+model OrderItem {
+  productId: int32;
+  name: string;
+  @minValue(1) quantity: int32;
+  price: Money;
+  total: Money;
+}
+
+model Order {
+  id: int32;
+  status: "paid";
+  createdAt: utcDateTime;
+  receiving: Receiving;
+  items: OrderItem[];
+  total: Money;
+}
+
+model ProblemProduct {
+  id: int32;
+  reason: "not_found" | "unavailable";
+}
+
+model OrderRejected extends ApiError {
+  products: ProblemProduct[];
+}
+
+@error
+model OrderConflict {
+  @statusCode code: 409;
+  @body body: OrderRejected;
+}
+
+@useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "psparts_session">)
+@route("/api/orders")
+@post
+op createOrder(@body order: CreateOrder):
+  | {
+      @statusCode code: 201;
+      @body body: Order;
+    }
+  | BadRequest
+  | Unauthorized
+  | OrderConflict
+  | ServerError;
+
+@useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "psparts_session">)
+@route("/api/orders")
+@get
+op listOrders(): Order[] | Unauthorized | ServerError;
+
+@useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "psparts_session">)
+@route("/api/orders/{id}")
+@get
+op getOrder(@minValue(1) @path id: int32):
+  | Order
+  | BadRequest
+  | Unauthorized
+  | NotFound
+  | ServerError;

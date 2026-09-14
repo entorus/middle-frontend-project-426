@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { SubmitEvent, ReactNode } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 
 import type { components, operations } from './generated/api'
 
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-function useAuth() {
+export function useAuth() {
   const value = useContext(AuthContext)
   if (!value) throw new Error('AuthProvider отсутствует')
   return value
@@ -120,6 +120,8 @@ export function AuthNavigation() {
 }
 
 export function AuthForm({ mode }: { mode: 'signup' | 'signin' }) {
+  const [params] = useSearchParams()
+  const destination = params.get('next') === 'checkout' ? '/checkout' : '/account'
   const { user, loading, error: sessionError, setUser } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -128,7 +130,7 @@ export function AuthForm({ mode }: { mode: 'signup' | 'signin' }) {
   const navigate = useNavigate()
   if (loading) return <p role="status">Проверяем вход…</p>
   if (sessionError) return <p role="alert">{sessionError}</p>
-  if (user) return <Navigate to="/account" replace />
+  if (user) return <Navigate to={destination} replace />
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     setPending(true)
@@ -137,7 +139,7 @@ export function AuthForm({ mode }: { mode: 'signup' | 'signin' }) {
       const current = await authRequest(mode, { email, password })
       setUser(current)
       setPassword('')
-      navigate('/account', { replace: true })
+      navigate(destination, { replace: true })
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Не удалось отправить форму')
     } finally {
@@ -181,20 +183,6 @@ export function AuthForm({ mode }: { mode: 'signup' | 'signin' }) {
       <Link to={mode === 'signup' ? '/signin' : '/signup'}>
         {mode === 'signup' ? 'Уже есть аккаунт? Войти' : 'Создать аккаунт'}
       </Link>
-    </section>
-  )
-}
-
-export function Account() {
-  const { user, loading, error } = useAuth()
-  if (loading) return <p role="status">Проверяем вход…</p>
-  if (error) return <p role="alert">{error}</p>
-  if (!user) return <Navigate to="/signin" replace />
-  return (
-    <section data-testid="account-page">
-      <h1>Личный кабинет</h1>
-      <p data-testid="account-email">{user.email}</p>
-      <p>Здесь появятся ваши заказы.</p>
     </section>
   )
 }

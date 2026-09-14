@@ -103,8 +103,8 @@ test('пустая корзина не пускает к оформлению д
   await expect(page.getByTestId('cart-empty')).toBeVisible()
   await expect(page.getByTestId('cart-checkout')).toBeDisabled()
   await page.goto('/checkout')
-  await expect(page).toHaveURL(/\/cart$/)
-  await expect(page.getByTestId('cart-empty')).toBeVisible()
+  await expect(page).toHaveURL(/\/signin\?next=checkout$/)
+  await expect(page.getByTestId('checkout-form')).toHaveCount(0)
 })
 
 test('свежие цена и название загружаются из API, не из localStorage', async ({ page, request }) => {
@@ -121,8 +121,8 @@ test('свежие цена и название загружаются из API,
   await expect(page.getByTestId('cart-total')).toHaveText(rubles(updated.price.amount))
   expect(await storedCart(page)).toEqual([{ id: product.id, quantity: 1 }])
   await page.getByTestId('cart-checkout').click()
-  await expect(page).toHaveURL(/\/checkout$/)
-  await expect(page.getByTestId('cart-total')).toHaveText(rubles(updated.price.amount))
+  await expect(page).toHaveURL(/\/signin\?next=checkout$/)
+  expect(await storedCart(page)).toEqual([{ id: product.id, quantity: 1 }])
 })
 
 test('исчезнувший товар отмечен, не включён в итог и может быть удалён', async ({

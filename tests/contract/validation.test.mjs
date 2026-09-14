@@ -23,7 +23,7 @@ test('Money проверяет копейки и валюту без приве�
     { amount: 0.5, currency: 'RUB' },
     { amount: '100', currency: 'RUB' },
     { amount: 100, currency: 'USD' },
-    { amount: 2147483648, currency: 'RUB' },
+    { amount: Number.MAX_SAFE_INTEGER + 1, currency: 'RUB' },
     { amount: 100 },
   ])
     assert.equal(validate(value), false, JSON.stringify(value))
