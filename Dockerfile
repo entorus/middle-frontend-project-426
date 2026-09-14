@@ -28,6 +28,5 @@ COPY --from=build /app/apps/front/dist /app/apps/front/dist
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
 USER node
-EXPOSE 3000
 
 ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]

@@ -21,7 +21,15 @@ for (const promo of promotions) {
   const product = await (await request(`/api/products/${promo.product.id}`)).json()
   assert.deepEqual(promo.product, product)
 }
-for (const path of ['/', '/catalog', '/catalog?category=processors', '/unknown-page']) {
+for (const path of [
+  '/',
+  '/cart',
+  '/account',
+  '/catalog',
+  '/catalog?category=processors',
+  '/unknown-page',
+  '/unknown.page',
+]) {
   const response = await request(path, 200, 'text/html')
   assert.match(await response.text(), /id="root"/)
 }

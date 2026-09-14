@@ -1,5 +1,21 @@
 import { test, expect } from '@playwright/test'
 
+test('SPA fallback поддерживает прямые пути с точкой, но не API и отсутствующие ресурсы', async ({
+  request,
+}) => {
+  for (const path of ['/cart', '/account', '/unknown.page']) {
+    const response = await request.get(path)
+    expect(response.status()).toBe(200)
+    expect(response.headers()['content-type']).toContain('text/html')
+    expect(await response.text()).toContain('id="root"')
+  }
+  for (const path of ['/api/missing', '/assets/missing.js', '/images/missing.svg']) {
+    const response = await request.get(path)
+    expect(response.status()).toBe(404)
+    expect(response.headers()['content-type']).toContain('application/json')
+  }
+})
+
 test('каталог открывается и показывает товары из базы', async ({ page }) => {
   const pageErrors = []
   page.on('pageerror', (error) => pageErrors.push(error.message))

@@ -1,4 +1,4 @@
-import { extname, resolve } from 'node:path'
+import { resolve } from 'node:path'
 
 import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
@@ -11,6 +11,9 @@ import { routeSchemas } from './generated/schemas'
 import { registerCatalog } from './catalog'
 import { registerPromotions } from './promotions'
 import { registerOrders } from './orders'
+import { parsePort } from './config'
+
+const port = parsePort(process.env.PORT)
 
 const fastify = Fastify({
   logger: {
@@ -35,7 +38,10 @@ fastify.setNotFoundHandler((request, reply) => {
   const pathname = request.url.split('?')[0]
   const isApi = pathname === '/api' || pathname.startsWith('/api/')
   const isPageRequest = request.method === 'GET' || request.method === 'HEAD'
-  const isAsset = pathname.startsWith('/assets/') || Boolean(extname(pathname))
+  const isAsset =
+    pathname.startsWith('/assets/') ||
+    pathname.startsWith('/images/') ||
+    pathname === '/favicon.ico'
 
   if (isApi || !isPageRequest || isAsset) {
     return reply.code(404).send({
@@ -79,7 +85,7 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 fastify.listen(
   {
     host: '0.0.0.0',
-    port: Number(process.env.PORT ?? 3000),
+    port,
   },
   (err) => {
     if (err) {
