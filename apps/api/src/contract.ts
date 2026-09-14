@@ -5,16 +5,35 @@ import type { FastifyInstance } from 'fastify'
 
 import { modelSchemas } from './generated/schemas'
 
+export class HttpError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
 export function configureContract(app: FastifyInstance) {
   // Responses must not coerce or silently remove invalid data.
   const ajv = new Ajv2020({ strict: false, allErrors: true })
-  ajv.addFormat('int32', {
+  const queryAjv = new Ajv2020({
+    strict: false,
+    allErrors: true,
+    coerceTypes: true,
+    useDefaults: true,
+  })
+  const int32Format = {
     type: 'number',
     validate: (value: number) =>
       Number.isInteger(value) && value >= -2147483648 && value <= 2147483647,
-  })
+  } as const
+  ajv.addFormat('int32', int32Format)
+  queryAjv.addFormat('int32', int32Format)
   const validateError = ajv.compile(modelSchemas.ApiError)
-  app.setValidatorCompiler(({ schema }) => ajv.compile(schema))
+  app.setValidatorCompiler(({ schema, httpPart }) =>
+    (httpPart === 'querystring' || httpPart === 'params' ? queryAjv : ajv).compile(schema),
+  )
   app.setSerializerCompiler(({ schema }) => {
     const validate = ajv.compile(schema)
     return (data) => {
@@ -29,10 +48,12 @@ export function configureContract(app: FastifyInstance) {
         : 500
     const statusCode = candidate >= 400 && candidate <= 599 ? candidate : 500
     if (statusCode >= 500) request.log.error(error)
+    let message = error instanceof HttpError ? error.message : 'Некорректный запрос'
+    if (statusCode >= 500) message = 'Внутренняя ошибка сервера'
     const body = {
       statusCode,
       error: STATUS_CODES[statusCode] ?? 'Error',
-      message: statusCode >= 500 ? 'Внутренняя ошибка сервера' : 'Некорректный запрос',
+      message,
     }
     if (!validateError(body)) throw new Error('Некорректный формат ошибки API')
     reply.code(statusCode).send(body)

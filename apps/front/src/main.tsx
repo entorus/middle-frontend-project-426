@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
 
 import App from './App'
+import { AuthProvider } from './auth'
 import './style.css'
 
 const root = document.getElementById('root')
@@ -16,7 +17,9 @@ createRoot(root).render(
       fallback={<p role="alert">Не удалось открыть приложение. Обновите страницу.</p>}
     >
       <BrowserRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </BrowserRouter>
     </Sentry.ErrorBoundary>
   </StrictMode>,

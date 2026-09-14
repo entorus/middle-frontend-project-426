@@ -30,10 +30,24 @@ for (const path of [
 await request('/unknown-page', 404, 'application/json', 'POST')
 await request('/catalog', 200, 'text/html', 'HEAD')
 const categories = await (await request('/api/categories')).json()
-const products = await (await request('/api/products')).json()
+const firstPage = await (await request('/api/products')).json()
+const products = [...firstPage.items]
+for (let page = 2; page <= firstPage.totalPages; page += 1) {
+  const result = await (await request(`/api/products?page=${page}`)).json()
+  products.push(...result.items)
+}
 assert.ok(categories.some((category) => category.slug === 'processors'))
 assert.ok(categories.some((category) => category.slug === 'graphics-cards'))
-assert.ok(products.length >= 6)
+assert.ok(categories.length >= 3)
+assert.ok(products.length >= 50)
+assert.ok(firstPage.totalPages >= 3)
+assert.ok(products.some((product) => product.image_url === null))
+assert.ok(products.some((product) => !product.available))
+assert.ok(
+  categories.every(
+    (category) => products.filter((product) => product.category_slug === category.slug).length >= 2,
+  ),
+)
 assert.equal(new Set(products.map((product) => product.sku)).size, products.length)
 assert.ok(
   products.every(
@@ -46,7 +60,7 @@ assert.ok(
 await request('/api/debug-sentry', process.env.EXPECT_SENTRY_TEST === 'true' ? 500 : 404)
 await request('/api/products?category=invalid!', 400)
 await request('/api/products?category=unknown-category', 404)
-const filtered = await (await request('/api/products?category=processors')).json()
+const { items: filtered } = await (await request('/api/products?category=processors')).json()
 assert.ok(
   filtered.length > 0 && filtered.every((product) => product.category_slug === 'processors'),
 )

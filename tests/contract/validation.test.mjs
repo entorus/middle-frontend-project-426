@@ -36,13 +36,19 @@ test('Fastify валидирует query по сгенерированной с�
   let calls = 0
   app.get('/api/products', { schema: routeSchemas.listProducts }, async () => {
     calls += 1
-    return []
+    return { items: [], total: 0, page: 1, pageSize: 12, totalPages: 0 }
   })
   assert.equal((await app.inject('/api/products?category=processors')).statusCode, 200)
   for (const url of [
     '/api/products?category=',
     '/api/products?category=bad!',
     '/api/products?category=a&category=b',
+    '/api/products?page=0',
+    '/api/products?page=1.5',
+    '/api/products?pageSize=49',
+    '/api/products?priceMin=-1',
+    '/api/products?available=yes',
+    '/api/products?search=',
   ]) {
     const response = await app.inject(url)
     assert.equal(response.statusCode, 400)
@@ -59,17 +65,25 @@ test('Fastify отклоняет ошибочные деньги в ответе
   const app = Fastify()
   t.after(() => app.close())
   configureContract(app)
-  app.get('/api/products', { schema: routeSchemas.listProducts }, async () => [
-    {
-      id: 1,
-      sku: 'TEST',
-      name: 'Test',
-      description: 'Test',
-      category_slug: 'processors',
-      category_name: 'Процессоры',
-      price: { amount: -100, currency: 'RUB' },
-    },
-  ])
+  app.get('/api/products', { schema: routeSchemas.listProducts }, async () => ({
+    total: 1,
+    page: 1,
+    pageSize: 12,
+    totalPages: 1,
+    items: [
+      {
+        id: 1,
+        sku: 'TEST',
+        name: 'Test',
+        description: 'Test',
+        category_slug: 'processors',
+        category_name: 'Процессоры',
+        price: { amount: -100, currency: 'RUB' },
+        available: true,
+        image_url: null,
+      },
+    ],
+  }))
   const response = await app.inject('/api/products')
   assert.equal(response.statusCode, 500)
   assert.deepEqual(response.json(), {
@@ -77,6 +91,20 @@ test('Fastify отклоняет ошибочные деньги в ответе
     error: 'Internal Server Error',
     message: 'Внутренняя ошибка сервера',
   })
+})
+
+test('query-схема преобразует числа и boolean, не меняя строгую валидацию body', async (t) => {
+  const app = Fastify()
+  t.after(() => app.close())
+  configureContract(app)
+  let parsed
+  app.get('/api/products', { schema: routeSchemas.listProducts }, async ({ query }) => {
+    parsed = { ...query }
+    return { items: [], total: 0, page: query.page, pageSize: query.pageSize, totalPages: 0 }
+  })
+  const response = await app.inject('/api/products?priceMin=0&priceMax=5000&available=true&page=2')
+  assert.equal(response.statusCode, 200)
+  assert.deepEqual(parsed, { priceMin: 0, priceMax: 5000, available: true, page: 2, pageSize: 12 })
 })
 
 test('ApiError принимает формат ошибок и отвергает неполные ответы', () => {

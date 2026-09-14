@@ -21,6 +21,10 @@ export default tseslint.config(
   js.configs.recommended,
   tseslint.configs.recommended,
   {
+    files: ['tests/e2e/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
     files: ['**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}'],
     plugins: { import: importPlugin },
     settings: {

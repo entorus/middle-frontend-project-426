@@ -7,24 +7,24 @@ test('главная открывается и показывает катало
   expect(response.status()).toBe(200)
   await expect(page.getByTestId('app-title')).toBeVisible()
   await expect(page.getByTestId('catalog')).toBeVisible()
-  await expect(page.getByTestId('product-card').first()).toBeVisible()
+  await expect(page.getByTestId('catalog-item').first()).toBeVisible()
   await expect(page.getByTestId('catalog-error')).toHaveCount(0)
   expect(pageErrors).toEqual([])
 })
 
 test('клиентский маршрут и фильтр сохраняются после перезагрузки', async ({ page }) => {
   await page.goto('/')
-  await page.getByTestId('catalog-link').click()
-  await page.getByTestId('category-processors').click()
+  await page.getByTestId('nav-catalog').click()
+  await page.getByTestId('filter-category').selectOption('processors')
   await expect(page).toHaveURL(/\/catalog\?category=processors$/)
-  await expect(page.getByTestId('category-processors')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByTestId('product-card').first()).toBeVisible()
+  await expect(page.getByTestId('filter-category')).toHaveValue('processors')
+  await expect(page.getByTestId('catalog-item').first()).toBeVisible()
 
   const response = await page.reload()
   expect(response.status()).toBe(200)
-  await expect(page.getByTestId('category-processors')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByTestId('product-card').first()).toBeVisible()
-  for (const card of await page.getByTestId('product-card').all()) {
+  await expect(page.getByTestId('filter-category')).toHaveValue('processors')
+  await expect(page.getByTestId('catalog-item').first()).toBeVisible()
+  for (const card of await page.getByTestId('catalog-item').all()) {
     await expect(card).toHaveAttribute('data-category', 'processors')
   }
 })
