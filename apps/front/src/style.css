@@ -323,3 +323,70 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+.home-hero {
+  max-width: 820px;
+}
+.home-catalog-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 16px 24px;
+  border-radius: 100px;
+  background: #253525;
+  color: #f5f8ef;
+}
+.home-hero .demo-note {
+  display: block;
+}
+.home-promo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.home-promo-card {
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  background: #e9eedf;
+  border: 1px solid #cbd5bc;
+  border-radius: 20px;
+  transition: border-color 150ms;
+}
+.home-promo-card:nth-child(even) {
+  background: #f0eee4;
+}
+.home-promo-card:hover {
+  border-color: #62724e;
+}
+.home-promo-card h3 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+.promo-text {
+  color: #58624f;
+  line-height: 1.65;
+  margin-bottom: 28px;
+}
+.promo-product {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #cbd5bc;
+}
+.promo-action {
+  margin-top: 24px;
+  font-weight: 700;
+}
+@media (max-width: 650px) {
+  .home-promo-grid {
+    grid-template-columns: 1fr;
+  }
+  .home-promotions .section-heading {
+    align-items: start;
+    flex-direction: column;
+    margin-bottom: 20px;
+    gap: 0;
+  }
+}

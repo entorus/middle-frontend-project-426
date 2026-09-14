@@ -114,6 +114,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/promotions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Промо-блоки в порядке показа. Недоступные товары исключены; пустой список допустим. */
+    get: operations['listPromotions']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/health-check': {
     parameters: {
       query?: never
@@ -198,6 +215,14 @@ export interface components {
       pageSize: number
       /** Format: int32 */
       totalPages: number
+    }
+    /** @description Промо-блок главной. Товар уникален в подборке и доступен для покупки. */
+    Promotion: {
+      /** Format: int32 */
+      id: number
+      title: string
+      text: string
+      product: components['schemas']['Product']
     }
     User: {
       /** Format: int32 */
@@ -517,6 +542,35 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiError']
+        }
+      }
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiError']
+        }
+      }
+    }
+  }
+  listPromotions: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Promotion'][]
         }
       }
       /** @description Server error */

@@ -13,6 +13,14 @@ async function request(path, status = 200, type = 'application/json', method = '
 }
 
 await request('/health-check')
+const promotions = await (await request('/api/promotions')).json()
+assert.ok(promotions.length >= 2)
+assert.equal(new Set(promotions.map((promo) => promo.product.id)).size, promotions.length)
+assert.ok(promotions.every((promo) => promo.product.available && promo.title && promo.text))
+for (const promo of promotions) {
+  const product = await (await request(`/api/products/${promo.product.id}`)).json()
+  assert.deepEqual(promo.product, product)
+}
 for (const path of ['/', '/catalog', '/catalog?category=processors', '/unknown-page']) {
   const response = await request(path, 200, 'text/html')
   assert.match(await response.text(), /id="root"/)

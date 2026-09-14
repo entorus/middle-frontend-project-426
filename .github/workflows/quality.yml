@@ -29,6 +29,9 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run lint && npm run format:check && npm run build
       - run: docker compose up --build -d --wait --wait-timeout 180
+      - run: npm run test:db
+        env:
+          TEST_DATABASE_URL: postgresql://psparts:local_password@127.0.0.1:5432/psparts
       - run: npm run test:smoke
       - run: docker compose exec -T app node dist/db/prepare.js && npm run test:smoke
       - name: Browser smoke tests

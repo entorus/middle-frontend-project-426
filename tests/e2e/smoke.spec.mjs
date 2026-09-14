@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test'
 
-test('главная открывается и показывает каталог из базы', async ({ page }) => {
+test('каталог открывается и показывает товары из базы', async ({ page }) => {
   const pageErrors = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
-  const response = await page.goto('/')
+  const response = await page.goto('/catalog')
   expect(response.status()).toBe(200)
   await expect(page.getByTestId('app-title')).toBeVisible()
   await expect(page.getByTestId('catalog')).toBeVisible()

@@ -2,6 +2,7 @@ import { Link, Route, Routes } from 'react-router-dom'
 
 import { Account, AuthForm, AuthNavigation } from './auth'
 import { Catalog, ProductDetail } from './catalog'
+import Home from './Home'
 
 function MonitoringTest() {
   return (
@@ -38,7 +39,7 @@ export default function App() {
           <Route path="/signup" element={<AuthForm key="signup" mode="signup" />} />
           <Route path="/signin" element={<AuthForm key="signin" mode="signin" />} />
           <Route path="/account/*" element={<Account />} />
-          <Route path="/" element={<Catalog />} />
+          <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           {import.meta.env.VITE_SENTRY_TEST_ENABLED === 'true' && (

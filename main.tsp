@@ -95,6 +95,19 @@ model ProductPage {
   @minValue(0) totalPages: int32;
 }
 
+@doc("Промо-блок главной. Товар уникален в подборке и доступен для покупки.")
+model Promotion {
+  id: int32;
+  @minLength(1) title: string;
+  @minLength(1) text: string;
+  product: Product;
+}
+
+@doc("Промо-блоки в порядке показа. Недоступные товары исключены; пустой список допустим.")
+@route("/api/promotions")
+@get
+op listPromotions(): Promotion[] | ServerError;
+
 @doc("Единый JSON-формат ошибок API. statusCode совпадает с HTTP-статусом.")
 @example(#{ statusCode: 400, error: "Bad Request", message: "Некорректный запрос" })
 model ApiError {

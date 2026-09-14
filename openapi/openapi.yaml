@@ -279,6 +279,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/promotions:
+    get:
+      operationId: listPromotions
+      description: Промо-блоки в порядке показа. Недоступные товары исключены; пустой список допустим.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Promotion'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /health-check:
     get:
       operationId: healthCheck
@@ -433,6 +453,26 @@ components:
           type: integer
           format: int32
           minimum: 0
+    Promotion:
+      type: object
+      required:
+        - id
+        - title
+        - text
+        - product
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          type: string
+          minLength: 1
+        text:
+          type: string
+          minLength: 1
+        product:
+          $ref: '#/components/schemas/Product'
+      description: Промо-блок главной. Товар уникален в подборке и доступен для покупки.
     User:
       type: object
       required:

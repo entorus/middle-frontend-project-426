@@ -260,6 +260,95 @@ export const modelSchemas = {
       },
     },
   },
+  Promotion: {
+    type: 'object',
+    required: ['id', 'title', 'text', 'product'],
+    properties: {
+      id: {
+        type: 'integer',
+        format: 'int32',
+      },
+      title: {
+        type: 'string',
+        minLength: 1,
+      },
+      text: {
+        type: 'string',
+        minLength: 1,
+      },
+      product: {
+        type: 'object',
+        required: [
+          'id',
+          'sku',
+          'name',
+          'description',
+          'price',
+          'category_slug',
+          'category_name',
+          'image_url',
+          'available',
+        ],
+        properties: {
+          id: {
+            type: 'integer',
+            format: 'int32',
+          },
+          sku: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          },
+          description: {
+            type: 'string',
+          },
+          price: {
+            type: 'object',
+            required: ['amount', 'currency'],
+            properties: {
+              amount: {
+                type: 'integer',
+                format: 'int32',
+                minimum: 0,
+              },
+              currency: {
+                type: 'string',
+                enum: ['RUB'],
+              },
+            },
+            description: 'Денежная сумма: amount — целое число копеек, currency — RUB.',
+            examples: [
+              {
+                amount: 1999000,
+                currency: 'RUB',
+              },
+            ],
+          },
+          category_slug: {
+            type: 'string',
+          },
+          category_name: {
+            type: 'string',
+          },
+          image_url: {
+            anyOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'null',
+              },
+            ],
+          },
+          available: {
+            type: 'boolean',
+          },
+        },
+      },
+    },
+    description: 'Промо-блок главной. Товар уникален в подборке и доступен для покупки.',
+  },
   User: {
     type: 'object',
     required: ['id', 'email'],
@@ -1071,6 +1160,128 @@ export const routeSchemas = {
         },
       },
       required: ['id'],
+    },
+  },
+  listPromotions: {
+    response: {
+      '200': {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['id', 'title', 'text', 'product'],
+          properties: {
+            id: {
+              type: 'integer',
+              format: 'int32',
+            },
+            title: {
+              type: 'string',
+              minLength: 1,
+            },
+            text: {
+              type: 'string',
+              minLength: 1,
+            },
+            product: {
+              type: 'object',
+              required: [
+                'id',
+                'sku',
+                'name',
+                'description',
+                'price',
+                'category_slug',
+                'category_name',
+                'image_url',
+                'available',
+              ],
+              properties: {
+                id: {
+                  type: 'integer',
+                  format: 'int32',
+                },
+                sku: {
+                  type: 'string',
+                },
+                name: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+                price: {
+                  type: 'object',
+                  required: ['amount', 'currency'],
+                  properties: {
+                    amount: {
+                      type: 'integer',
+                      format: 'int32',
+                      minimum: 0,
+                    },
+                    currency: {
+                      type: 'string',
+                      enum: ['RUB'],
+                    },
+                  },
+                  description: 'Денежная сумма: amount — целое число копеек, currency — RUB.',
+                  examples: [
+                    {
+                      amount: 1999000,
+                      currency: 'RUB',
+                    },
+                  ],
+                },
+                category_slug: {
+                  type: 'string',
+                },
+                category_name: {
+                  type: 'string',
+                },
+                image_url: {
+                  anyOf: [
+                    {
+                      type: 'string',
+                    },
+                    {
+                      type: 'null',
+                    },
+                  ],
+                },
+                available: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+          description: 'Промо-блок главной. Товар уникален в подборке и доступен для покупки.',
+        },
+      },
+      '500': {
+        type: 'object',
+        required: ['statusCode', 'error', 'message'],
+        properties: {
+          statusCode: {
+            type: 'integer',
+            format: 'int32',
+            minimum: 400,
+            maximum: 599,
+          },
+          error: {
+            type: 'string',
+          },
+          message: {
+            type: 'string',
+          },
+        },
+        description: 'Единый JSON-формат ошибок API. statusCode совпадает с HTTP-статусом.',
+        examples: [
+          {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Некорректный запрос',
+          },
+        ],
+      },
     },
   },
   healthCheck: {

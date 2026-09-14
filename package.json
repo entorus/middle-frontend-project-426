@@ -6,6 +6,7 @@
     "contract:generate": "npm run openapi:generate && node scripts/generate-contract.mjs",
     "contract:check": "npm run contract:generate && git diff --exit-code -- openapi/openapi.yaml apps/api/src/generated apps/front/src/generated",
     "test:contract": "npm --prefix apps/api run build && node --test tests/contract/*.test.mjs",
+    "test:db": "npm --prefix apps/api run build && node --test tests/db/*.test.mjs",
     "typespec:format": "tsp format main.tsp",
     "test": "playwright test",
     "test:e2e": "playwright test",

@@ -9,6 +9,7 @@ import { registerAuth } from './auth'
 import { configureContract } from './contract'
 import { routeSchemas } from './generated/schemas'
 import { registerCatalog } from './catalog'
+import { registerPromotions } from './promotions'
 
 const fastify = Fastify({
   logger: {
@@ -57,6 +58,7 @@ fastify.get('/api/categories', { schema: routeSchemas.listCategories }, async ()
 })
 
 registerCatalog(fastify, db)
+registerPromotions(fastify, db)
 
 fastify.addHook('onClose', async () => {
   await db.destroy()

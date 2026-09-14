@@ -6,29 +6,29 @@ import { routeSchemas } from './generated/schemas'
 import type { components, operations } from './generated/api'
 
 type Product = components['schemas']['Product']
-type Row = Omit<Product, 'price'> & { price_kopecks: number }
+export type ProductRow = Omit<Product, 'price'> & { price_kopecks: number }
 type Query = NonNullable<operations['listProducts']['parameters']['query']>
-const toProduct = ({ price_kopecks, ...product }: Row): Product => ({
+export const toProduct = ({ price_kopecks, ...product }: ProductRow): Product => ({
   ...product,
   price: { amount: price_kopecks, currency: 'RUB' },
 })
 
-export function registerCatalog(app: FastifyInstance, db: Knex) {
-  const selectProducts = () =>
-    db('products')
-      .join('categories', 'categories.id', 'products.category_id')
-      .select(
-        'products.id',
-        'products.sku',
-        'products.name',
-        'products.description',
-        'products.price_kopecks',
-        'products.image_url',
-        'products.available',
-        'categories.slug as category_slug',
-        'categories.name as category_name',
-      )
+export const selectProducts = (db: Knex) =>
+  db('products')
+    .join('categories', 'categories.id', 'products.category_id')
+    .select(
+      'products.id',
+      'products.sku',
+      'products.name',
+      'products.description',
+      'products.price_kopecks',
+      'products.image_url',
+      'products.available',
+      'categories.slug as category_slug',
+      'categories.name as category_name',
+    )
 
+export function registerCatalog(app: FastifyInstance, db: Knex) {
   app.get<{ Querystring: Query }>(
     '/api/products',
     { schema: routeSchemas.listProducts },
@@ -38,7 +38,7 @@ export function registerCatalog(app: FastifyInstance, db: Knex) {
         throw new HttpError(400, 'Минимальная цена не может быть больше максимальной')
       if (category && !(await db('categories').where('slug', category).first()))
         throw new HttpError(404, 'Категория не найдена')
-      const filtered = selectProducts()
+      const filtered = selectProducts(db)
       if (category) filtered.where('categories.slug', category)
       if (priceMin !== undefined) filtered.where('price_kopecks', '>=', priceMin * 100)
       if (priceMax !== undefined) filtered.where('price_kopecks', '<=', priceMax * 100)
@@ -50,7 +50,7 @@ export function registerCatalog(app: FastifyInstance, db: Knex) {
         .count<{ total: string }>({ total: '*' })
         .first()
       const total = Number(count?.total ?? 0)
-      const rows: Row[] = await filtered
+      const rows: ProductRow[] = await filtered
         .orderBy('products.id')
         .limit(pageSize)
         .offset((page - 1) * pageSize)
@@ -68,7 +68,7 @@ export function registerCatalog(app: FastifyInstance, db: Knex) {
     '/api/products/:id',
     { schema: routeSchemas.getProduct },
     async ({ params }) => {
-      const product: Row | undefined = await selectProducts()
+      const product: ProductRow | undefined = await selectProducts(db)
         .where('products.id', params.id)
         .first()
       if (!product) throw new HttpError(404, 'Товар не найден')

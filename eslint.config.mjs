@@ -64,6 +64,7 @@ export default tseslint.config(
       'apps/api/**/*.{js,cjs,mjs,ts,cts,mts}',
       'scripts/*.mjs',
       'tests/contract/*.mjs',
+      'tests/db/*.mjs',
       '*.config.{js,cjs,mjs}',
     ],
     languageOptions: { globals: globals.node },
