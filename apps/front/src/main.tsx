@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/react'
 
 import App from './App'
 import { AuthProvider } from './auth'
+import { CartProvider } from './cart'
 import './style.css'
 
 const root = document.getElementById('root')
@@ -18,7 +19,9 @@ createRoot(root).render(
     >
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </Sentry.ErrorBoundary>

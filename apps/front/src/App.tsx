@@ -3,6 +3,7 @@ import { Link, Route, Routes } from 'react-router-dom'
 import { Account, AuthForm, AuthNavigation } from './auth'
 import { Catalog, ProductDetail } from './catalog'
 import Home from './Home'
+import { CartNavigation, CartPage } from './cart'
 
 function MonitoringTest() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         </Link>
         <nav>
           <AuthNavigation />
+          <CartNavigation />
           <Link to="/catalog" data-testid="nav-catalog">
             Каталог комплектующих ↗
           </Link>
@@ -41,6 +43,8 @@ export default function App() {
           <Route path="/account/*" element={<Account />} />
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CartPage key="checkout" checkout />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           {import.meta.env.VITE_SENTRY_TEST_ENABLED === 'true' && (
             <Route path="/monitoring-test" element={<MonitoringTest />} />

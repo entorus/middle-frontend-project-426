@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import type { components } from './generated/api'
 import { useResource } from './useResource'
+import { AddToCart } from './cart'
 
 type Product = components['schemas']['Product']
 type ProductPage = components['schemas']['ProductPage']
@@ -268,11 +269,12 @@ export function ProductDetail() {
       {!data && !error && <p role="status">Загрузка…</p>}
       {data && (
         <>
-          <h1>{data.name}</h1>
+          <h1 data-testid="product-name">{data.name}</h1>
           <ProductImage key={data.id} product={data} />
-          <p>{data.description}</p>
-          <strong>{currency.format(data.price.amount / 100)}</strong>
+          <p data-testid="product-description">{data.description}</p>
+          <strong data-testid="product-price">{currency.format(data.price.amount / 100)}</strong>
           <p>{data.available ? 'В наличии' : 'Нет в наличии'}</p>
+          <AddToCart key={data.id} product={data} />
         </>
       )}
     </section>
