@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom'
 import { emptyFilters } from './types'
 import type { Filters } from './types'
 
+const filterDebounceMs = 350
+
 export function useCatalogFilters() {
   const [params, setParams] = useSearchParams()
   const queryString = params.toString()
@@ -35,7 +37,8 @@ export function useCatalogFilters() {
     const next = { ...draft, [name]: value }
     setDraft(next)
     clearTimeout(timer.current)
-    if (name === 'search') timer.current = setTimeout(() => commit(next), 350)
+    if (name === 'search' || name === 'priceMin' || name === 'priceMax')
+      timer.current = setTimeout(() => commit(next), filterDebounceMs)
     else commit(next)
   }
   function changePage(page: number) {

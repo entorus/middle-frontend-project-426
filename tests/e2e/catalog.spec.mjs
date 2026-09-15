@@ -101,6 +101,44 @@ test('поиск по части названия отложен и примен
   await expectResults(page, request)
 })
 
+for (const [field, parameter] of [
+  ['filter-price-min', 'priceMin'],
+  ['filter-price-max', 'priceMax'],
+]) {
+  test(`${parameter}: ввод цифр отправляет один запрос после паузы`, async ({ page, request }) => {
+    await page.goto('/catalog')
+    const initial = await expectResults(page, request)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date())
+    const queries = []
+    page.on('request', (req) => {
+      const url = new URL(req.url())
+      if (url.pathname === '/api/products') queries.push(url.search)
+    })
+    const input = page.getByTestId(field)
+    await input.focus()
+    for (const digit of '20000') {
+      await input.press(digit)
+      await page.clock.runFor(100)
+    }
+    await expect(input).toHaveValue('20000')
+    expect(queries).toEqual([])
+    await expect(page.getByTestId('catalog-item-name')).toHaveText(
+      initial.items.map((item) => item.name),
+    )
+    await page.clock.runFor(250)
+    await expectResults(page, request, `${parameter}=20000`)
+    expect(queries).toEqual([`?${parameter}=20000`])
+
+    await input.fill('30000')
+    await page.getByTestId('filter-reset').click()
+    await page.clock.runFor(500)
+    await expect(input).toHaveValue('')
+    await expectResults(page, request)
+    expect(queries.some((query) => query.includes('30000'))).toBe(false)
+  })
+}
+
 test('пустая комбинация фильтров показывает явное состояние', async ({ page }) => {
   await page.goto('/catalog?category=memory&priceMin=100000&available=true')
   await expect(page.getByTestId('catalog-empty')).toBeVisible()
