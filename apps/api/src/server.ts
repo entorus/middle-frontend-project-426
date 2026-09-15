@@ -25,7 +25,7 @@ configureContract(fastify)
 registerAuth(fastify, db)
 Sentry.setupFastifyErrorHandler(fastify)
 
-fastify.get('/health-check', { schema: routeSchemas.healthCheck }, (request, reply) => {
+fastify.get('/api/health', { schema: routeSchemas.apiHealth }, (request, reply) => {
   reply.send({ health: 'check' })
 })
 

@@ -1408,6 +1408,23 @@ export const routeSchemas = {
       },
     },
   },
+  apiHealth: {
+    response: {
+      '200': {
+        type: 'object',
+        required: ['health'],
+        properties: {
+          health: {
+            type: 'string',
+            enum: ['check'],
+          },
+        },
+        unevaluatedProperties: {
+          not: {},
+        },
+      },
+    },
+  },
   createOrder: {
     response: {
       '201': {
@@ -2892,23 +2909,6 @@ export const routeSchemas = {
             message: 'Некорректный запрос',
           },
         ],
-      },
-    },
-  },
-  healthCheck: {
-    response: {
-      '200': {
-        type: 'object',
-        required: ['health'],
-        properties: {
-          health: {
-            type: 'string',
-            enum: ['check'],
-          },
-        },
-        unevaluatedProperties: {
-          not: {},
-        },
       },
     },
   },

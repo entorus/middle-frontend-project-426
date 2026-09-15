@@ -139,9 +139,9 @@ model NotFound {
 }
 
 @doc("Проверка доступности сервера.")
-@route("/health-check")
+@route("/api/health")
 @get
-op healthCheck(): Health;
+op apiHealth(): Health;
 
 @doc("Список категорий, отсортированный по id.")
 @route("/api/categories")

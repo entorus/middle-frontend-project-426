@@ -81,6 +81,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/health': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Проверка доступности сервера. */
+    get: operations['apiHealth']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/orders': {
     parameters: {
       query?: never
@@ -155,23 +172,6 @@ export interface paths {
     }
     /** @description Промо-блоки в порядке показа. Недоступные товары исключены; пустой список допустим. */
     get: operations['listPromotions']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/health-check': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Проверка доступности сервера. */
-    get: operations['healthCheck']
     put?: never
     post?: never
     delete?: never
@@ -536,6 +536,26 @@ export interface operations {
       }
     }
   }
+  apiHealth: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Health']
+        }
+      }
+    }
+  }
   listOrders: {
     parameters: {
       query?: never
@@ -824,26 +844,6 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiError']
-        }
-      }
-    }
-  }
-  healthCheck: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description The request has succeeded. */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Health']
         }
       }
     }

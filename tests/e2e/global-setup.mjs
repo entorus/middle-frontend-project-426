@@ -7,7 +7,7 @@ export default async function globalSetup(config) {
       .poll(
         async () => {
           try {
-            const response = await context.get('/health-check', { timeout: 3000 })
+            const response = await context.get('/api/health', { timeout: 3000 })
             if (!response.ok() || !response.headers()['content-type']?.includes('application/json'))
               return false
             const body = await response.json()
@@ -19,7 +19,7 @@ export default async function globalSetup(config) {
         {
           timeout: 60000,
           intervals: [500, 1000, 2000],
-          message: 'Приложение не готово: /health-check должен вернуть JSON { health: "check" }',
+          message: 'Приложение не готово: /api/health должен вернуть JSON { health: "check" }',
         },
       )
       .toBe(true)

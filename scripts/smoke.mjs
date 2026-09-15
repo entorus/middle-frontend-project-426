@@ -12,7 +12,7 @@ async function request(path, status = 200, type = 'application/json', method = '
   return response
 }
 
-await request('/health-check')
+assert.deepEqual(await (await request('/api/health')).json(), { health: 'check' })
 const promotions = await (await request('/api/promotions')).json()
 assert.ok(promotions.length >= 2)
 assert.equal(new Set(promotions.map((promo) => promo.product.id)).size, promotions.length)

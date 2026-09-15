@@ -269,7 +269,7 @@ DSN фронтенда доступен в JS-бандле. `SENTRY_AUTH_TOKEN` 
 Для Render: подключите GitHub-репозиторий, выберите Docker, путь `./Dockerfile`, контекст
 корня репозитория; Root Directory и Docker Command оставьте пустыми.
 Создайте managed PostgreSQL в том же регионе и задайте внутренний URL как `DATABASE_URL`.
-Укажите DSN в Environment, health check `/health-check`, ветку `main` и Auto-Deploy → After CI Checks Pass.
+Укажите DSN в Environment, health check `/api/health`, ветку `main` и Auto-Deploy → After CI Checks Pass.
 Compose используется локально, managed-база не создаётся Dockerfile.
 GitHub workflow `quality.yml` проверяет линтер, сборку, контейнеры и повторный сид.
 
@@ -294,7 +294,7 @@ npm run contract:generate
 Для форматирования TypeSpec: `npm run typespec:format`.
 Обязательные точки с запятой в TypeSpec сохраняются: правило JS/TS `semi: never` на него не распространяется.
 
-Описаны `/health-check`, `/api/categories`, `/api/products`, `/api/products/{id}`,
+Описаны `/api/health`, `/api/categories`, `/api/products`, `/api/products/{id}`,
 операции авторизации и общие модели `Money` и `ApiError`.
 `Money` — `{ amount: 1999000, currency: "RUB" }`: неотрицательное целое количество копеек
 в пределах безопасного целого JavaScript. В API товар содержит `price: Money` вместо `price_kopecks`;
@@ -338,7 +338,7 @@ npm run test:contract # негативные тесты Money, ошибок и F
 ### Браузерные тесты
 
 Playwright запускает Chromium против уже работающего приложения; перед тестами
-ожидает до 60 секунд успешный JSON-ответ `/health-check`.
+ожидает до 60 секунд успешный JSON-ответ `/api/health` — тот же адрес проверяет Хекслет.
 
 ```bash
 npm ci

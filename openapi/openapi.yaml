@@ -151,6 +151,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/health:
+    get:
+      operationId: apiHealth
+      description: Проверка доступности сервера.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
   /api/orders:
     post:
       operationId: createOrder
@@ -414,18 +426,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-  /health-check:
-    get:
-      operationId: healthCheck
-      description: Проверка доступности сервера.
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Health'
 components:
   schemas:
     ApiError:
