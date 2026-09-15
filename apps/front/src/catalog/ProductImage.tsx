@@ -1,27 +1,39 @@
-import { useState } from 'react'
-
 import type { Product } from './types'
 
+const categoryColors: Record<string, string> = {
+  processors: 'bg-violet-50 text-violet-700',
+  'graphics-cards': 'bg-indigo-50 text-indigo-700',
+  memory: 'bg-emerald-50 text-emerald-700',
+}
+
 export function ProductImage({ product, large = false }: { product: Product; large?: boolean }) {
-  const [failed, setFailed] = useState(false)
   const size = large ? 'h-72 sm:h-96' : 'h-44'
-  if (!product.image_url || failed)
-    return (
-      <div
-        className={`grid ${size} w-full place-items-center bg-indigo-50 p-5 text-center text-sm text-indigo-400`}
-        role="img"
-        aria-label={`Нет изображения: ${product.name}`}
-      >
-        Изображение отсутствует
-      </div>
-    )
+  const colors = categoryColors[product.category_slug] ?? 'bg-amber-50 text-amber-700'
   return (
-    <img
-      className={`${size} w-full bg-indigo-50 object-contain p-5`}
-      src={product.image_url}
-      alt={product.name}
-      loading="lazy"
-      onError={() => setFailed(true)}
-    />
+    <div
+      className={`${size} ${colors} grid w-full place-items-center overflow-hidden p-2`}
+      role="img"
+      aria-label={`${product.name} — ${product.category_name}`}
+      data-testid="product-illustration"
+      data-category={product.category_slug}
+    >
+      <div className={`relative aspect-[3/2] w-full ${large ? 'max-w-lg' : 'max-w-60'}`}>
+        <svg className="block w-full opacity-20" viewBox="0 0 360 240" aria-hidden="true">
+          <use href="/images/product-chip.svg#chip" />
+        </svg>
+        <div className="absolute inset-x-[27%] top-[28%] flex h-[37%] items-center justify-center px-1 text-center">
+          <span
+            className={`${large ? 'text-base sm:text-xl' : 'text-xs'} font-bold leading-tight wrap-anywhere`}
+          >
+            {product.name}
+          </span>
+        </div>
+        <span
+          className={`absolute inset-x-2 bottom-0 text-center ${large ? 'text-sm' : 'text-xs'} opacity-70`}
+        >
+          {product.category_name}
+        </span>
+      </div>
+    </div>
   )
 }

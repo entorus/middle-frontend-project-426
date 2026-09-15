@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240">
+  <g id="chip" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="72" y="40" width="216" height="144" rx="12"/>
+    <rect x="94" y="68" width="172" height="88" rx="6"/>
+    <path d="M104 20v20m38-20v20m38-20v20m38-20v20m38-20v20
+      M104 184v20m38-20v20m38-20v20m38-20v20m38-20v20
+      M48 70h24m-24 28h24m-24 28h24m-24 28h24
+      M288 70h24m-24 28h24m-24 28h24m-24 28h24"/>
+  </g>
+</svg>
