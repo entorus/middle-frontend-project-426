@@ -78,11 +78,14 @@ test('неверный пароль отклоняется', async ({ page, requ
   await expect(page.getByTestId('nav-account')).toHaveCount(0)
 })
 
-test('сессия сохраняется после перезагрузки', async ({ page }) => {
+test('сессия сохраняется после перезагрузки', async ({ page, context }) => {
   const account = credentials()
   await page.goto('/signup')
   await fillForm(page, account)
   await expect(page.getByTestId('account-email')).toHaveText(account.email)
+  const cookie = (await context.cookies()).find((item) => item.name === 'psparts_session')
+  expect(cookie).toBeDefined()
+  expect(cookie.secure).toBe(new URL(page.url()).protocol === 'https:')
   await page.reload()
   await expect(page.getByTestId('account-email')).toHaveText(account.email)
   await expect(page.getByTestId('nav-signout')).toBeVisible()

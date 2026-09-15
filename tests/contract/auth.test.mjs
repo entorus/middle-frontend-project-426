@@ -10,6 +10,48 @@ import { registerAuth } from '../../apps/api/dist/auth.js'
 const requireApi = createRequire(new URL('../../apps/api/package.json', import.meta.url))
 const Fastify = requireApi('fastify')
 
+test('production HTTP и HTTPS: Secure определяется транспортом, не NODE_ENV', async (t) => {
+  const saved = Object.fromEntries(
+    ['NODE_ENV', 'COOKIE_SECURE', 'APP_ORIGIN'].map((name) => [name, process.env[name]]),
+  )
+  t.after(() => {
+    for (const [name, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[name]
+      else process.env[name] = value
+    }
+  })
+  process.env.NODE_ENV = 'production'
+  delete process.env.COOKIE_SECURE
+  delete process.env.APP_ORIGIN
+  const app = Fastify()
+  t.after(() => app.close())
+  configureContract(app)
+  registerAuth(app, () => {
+    throw new Error('Гостевой выход не должен обращаться к БД')
+  })
+  async function check(secure, headers = {}) {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signout',
+      headers: { host: 'online-store.test:8080', ...headers },
+    })
+    assert.equal(response.statusCode, 200)
+    const cookie = response.headers['set-cookie']
+    assert.equal(cookie.includes('; Secure'), secure)
+    assert.match(cookie, /HttpOnly; SameSite=Lax; Max-Age=0/)
+  }
+  await check(false)
+  await check(true, { 'x-forwarded-proto': 'https' })
+  await check(false, { 'x-forwarded-proto': 'http' })
+  process.env.APP_ORIGIN = 'https://shop.example.com'
+  await check(true, { 'x-forwarded-proto': 'http' })
+  delete process.env.APP_ORIGIN
+  process.env.COOKIE_SECURE = 'true'
+  await check(true)
+  process.env.COOKIE_SECURE = 'false'
+  await check(false)
+})
+
 test('auth routes: гость, невалидная cookie, выход и CSRF без обращения к БД', async (t) => {
   const app = Fastify()
   t.after(() => app.close())

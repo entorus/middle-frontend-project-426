@@ -23,7 +23,6 @@ services:
         VITE_SENTRY_TEST_ENABLED: ${VITE_SENTRY_TEST_ENABLED:-false}
     environment:
       NODE_ENV: production
-      COOKIE_SECURE: 'false'
       PORT: '3000'
       DATABASE_URL: postgresql://psparts:local_password@db:5432/psparts
       SENTRY_DSN: ${SENTRY_DSN:-}

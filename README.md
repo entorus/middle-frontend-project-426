@@ -199,9 +199,12 @@ API: `POST /api/auth/signup`, `POST /api/auth/signin` принимают JSON `{
 как scrypt-хеши с независимой случайной солью (N=65536, r=8, p=2), токены сессий —
 только как SHA-256-хеши. Cookie `psparts_session` имеет HttpOnly, SameSite=Lax и срок 7 дней.
 Сессия переживает перезапуск сервера; истёкшие сессии не авторизуют и очищаются при создании новых.
-В production cookie по умолчанию Secure; локальный Compose явно отключает Secure для HTTP.
-При прямом запуске `COOKIE_SECURE` позволяет переопределить это поведение. Для HTTPS оставьте
-Secure включённым. Если прокси изменяет Host, задайте `APP_ORIGIN` точным публичным origin
+Secure определяется по HTTPS-запросу, HTTPS в `APP_ORIGIN` или `X-Forwarded-Proto: https`,
+а не по `NODE_ENV`: HTTP-проверки Docker работают и в production-режиме.
+Заголовок прокси может только включить Secure; он не отключает его для прямого HTTPS или HTTPS в `APP_ORIGIN`.
+Для HTTPS-продакшена рекомендуется явно задать `COOKIE_SECURE=true`; обратный прокси должен
+перезаписывать `X-Forwarded-Proto`. `COOKIE_SECURE=false` допустим только для локального HTTP.
+Если прокси изменяет Host, задайте `APP_ORIGIN` точным публичным origin
 (без завершающего `/`). Cross-site POST-запросы отклоняются. Пароли и cookie не отправляются в Sentry.
 
 Проверки после запуска Docker Desktop:

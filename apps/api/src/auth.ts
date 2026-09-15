@@ -27,7 +27,9 @@ function setCookie(reply: FastifyReply, value: string, maxAge: number) {
   const secure =
     process.env.COOKIE_SECURE !== undefined
       ? process.env.COOKIE_SECURE === 'true'
-      : process.env.NODE_ENV === 'production'
+      : reply.request.protocol === 'https' ||
+        process.env.APP_ORIGIN?.startsWith('https://') === true ||
+        reply.request.headers['x-forwarded-proto'] === 'https'
   reply.header(
     'set-cookie',
     `${cookieName}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure ? '; Secure' : ''}`,
