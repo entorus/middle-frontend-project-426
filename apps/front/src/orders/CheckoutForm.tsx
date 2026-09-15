@@ -1,3 +1,4 @@
+import { Button, Input, Select } from '../shared/ui'
 import type { useCheckout } from './useCheckout'
 
 type Props = Pick<
@@ -28,9 +29,14 @@ export function CheckoutForm({
 }: Props) {
   return (
     <form data-testid="checkout-form" onSubmit={(event) => void submit(event)}>
-      <fieldset disabled={pending}>
-        <label htmlFor="checkout-method">Способ получения</label>
-        <select
+      <fieldset
+        className="grid gap-3 rounded-xl border border-gray-200 bg-white p-5"
+        disabled={pending}
+      >
+        <label className="text-sm font-medium text-gray-800" htmlFor="checkout-method">
+          Способ получения
+        </label>
+        <Select
           id="checkout-method"
           data-testid="checkout-method"
           value={method}
@@ -38,9 +44,11 @@ export function CheckoutForm({
         >
           <option value="delivery">Доставка</option>
           <option value="pickup">Самовывоз</option>
-        </select>
-        <label htmlFor="checkout-name">Имя получателя</label>
-        <input
+        </Select>
+        <label className="text-sm font-medium text-gray-800" htmlFor="checkout-name">
+          Имя получателя
+        </label>
+        <Input
           id="checkout-name"
           data-testid="checkout-name"
           autoComplete="name"
@@ -49,8 +57,10 @@ export function CheckoutForm({
           value={name}
           onChange={(event) => setName(event.target.value)}
         />
-        <label htmlFor="checkout-phone">Телефон</label>
-        <input
+        <label className="text-sm font-medium text-gray-800" htmlFor="checkout-phone">
+          Телефон
+        </label>
+        <Input
           id="checkout-phone"
           data-testid="checkout-phone"
           type="tel"
@@ -63,8 +73,10 @@ export function CheckoutForm({
         />
         {method === 'delivery' ? (
           <>
-            <label htmlFor="checkout-address">Адрес доставки</label>
-            <input
+            <label className="text-sm font-medium text-gray-800" htmlFor="checkout-address">
+              Адрес доставки
+            </label>
+            <Input
               id="checkout-address"
               data-testid="checkout-address"
               autoComplete="street-address"
@@ -77,9 +89,9 @@ export function CheckoutForm({
         ) : (
           <p>Самовывоз из единственного пункта выдачи магазина. Адрес доставки не нужен.</p>
         )}
-        <button type="submit" data-testid="checkout-submit">
+        <Button variant="primary" type="submit" data-testid="checkout-submit">
           {pending ? 'Оформляем…' : 'Оформить заказ'}
-        </button>
+        </Button>
       </fieldset>
     </form>
   )

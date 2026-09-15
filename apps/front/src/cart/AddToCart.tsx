@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { Button } from '../shared/ui'
 import { useCart } from './CartProvider'
 import { maxQuantity } from './storage'
 import type { components } from '../generated/api'
@@ -24,21 +25,27 @@ export function AddToCart({ product }: { product: Product }) {
     }
   }
   return (
-    <div className="product-cart-actions">
-      <button
+    <div className="mt-4 space-y-3">
+      <Button
+        variant="primary"
+        className="w-full"
         type="button"
         data-testid="product-add-to-cart"
         disabled={!product.available || pending || quantity >= maxQuantity}
         onClick={() => void addProduct()}
       >
         {pending ? 'Добавляем…' : 'В корзину'}
-      </button>
+      </Button>
       {quantity > 0 && (
-        <p role="status">
+        <p className="py-2 text-sm text-gray-500" role="status">
           В корзине: {quantity}. <Link to="/cart">Открыть корзину</Link>
         </p>
       )}
-      {(error || storageError) && <p role="alert">{error || storageError}</p>}
+      {(error || storageError) && (
+        <p className="text-sm text-red-600" role="alert">
+          {error || storageError}
+        </p>
+      )}
     </div>
   )
 }

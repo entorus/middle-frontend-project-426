@@ -1,3 +1,4 @@
+import { Button, Input, Select } from '../shared/ui'
 import { useResource } from '../useResource'
 import type { Category } from './types'
 import type { useCatalogFilters } from './useCatalogFilters'
@@ -7,10 +8,16 @@ type Props = Pick<ReturnType<typeof useCatalogFilters>, 'draft' | 'update' | 're
 export function CatalogFilters({ draft, update, reset }: Props) {
   const categories = useResource<Category[]>('/api/categories')
   return (
-    <aside className="catalog-filters" data-testid="catalog-filters" aria-label="Фильтры каталога">
-      <h2>Фильтры</h2>
-      <label htmlFor="filter-search">Название</label>
-      <input
+    <aside
+      className="grid gap-3 rounded-xl border border-gray-200 bg-white p-4"
+      data-testid="catalog-filters"
+      aria-label="Фильтры каталога"
+    >
+      <h2 className="mb-2 text-lg font-semibold text-gray-900">Фильтры</h2>
+      <label className="text-sm font-medium text-gray-800" htmlFor="filter-search">
+        Название
+      </label>
+      <Input
         id="filter-search"
         data-testid="filter-search"
         type="search"
@@ -18,8 +25,10 @@ export function CatalogFilters({ draft, update, reset }: Props) {
         value={draft.search}
         onChange={(event) => update('search', event.target.value)}
       />
-      <label htmlFor="filter-category">Категория</label>
-      <select
+      <label className="text-sm font-medium text-gray-800" htmlFor="filter-category">
+        Категория
+      </label>
+      <Select
         id="filter-category"
         data-testid="filter-category"
         value={draft.category}
@@ -31,17 +40,19 @@ export function CatalogFilters({ draft, update, reset }: Props) {
             {category.name}
           </option>
         ))}
-      </select>
+      </Select>
       {categories.error && (
-        <p role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {categories.error}
-          <button type="button" onClick={categories.retry}>
+          <Button type="button" onClick={categories.retry}>
             Повторить загрузку категорий
-          </button>
+          </Button>
         </p>
       )}
-      <label htmlFor="filter-price-min">Цена от, ₽</label>
-      <input
+      <label className="text-sm font-medium text-gray-800" htmlFor="filter-price-min">
+        Цена от, ₽
+      </label>
+      <Input
         id="filter-price-min"
         data-testid="filter-price-min"
         type="number"
@@ -51,8 +62,10 @@ export function CatalogFilters({ draft, update, reset }: Props) {
         value={draft.priceMin}
         onChange={(event) => update('priceMin', event.target.value)}
       />
-      <label htmlFor="filter-price-max">Цена до, ₽</label>
-      <input
+      <label className="text-sm font-medium text-gray-800" htmlFor="filter-price-max">
+        Цена до, ₽
+      </label>
+      <Input
         id="filter-price-max"
         data-testid="filter-price-max"
         type="number"
@@ -62,8 +75,8 @@ export function CatalogFilters({ draft, update, reset }: Props) {
         value={draft.priceMax}
         onChange={(event) => update('priceMax', event.target.value)}
       />
-      <label className="availability-filter">
-        <input
+      <label className="flex items-center gap-2 py-1 text-sm font-normal">
+        <Input
           data-testid="filter-available"
           type="checkbox"
           checked={draft.available}
@@ -71,9 +84,9 @@ export function CatalogFilters({ draft, update, reset }: Props) {
         />
         Только в наличии
       </label>
-      <button type="button" data-testid="filter-reset" onClick={reset}>
+      <Button type="button" data-testid="filter-reset" onClick={reset}>
         Сбросить фильтры
-      </button>
+      </Button>
     </aside>
   )
 }

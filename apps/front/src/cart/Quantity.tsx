@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { Input } from '../shared/ui'
 import { useCart } from './CartProvider'
 import { maxQuantity } from './storage'
 import type { CartItem } from './storage'
@@ -10,9 +11,9 @@ export function Quantity({ item }: { item: CartItem }) {
   useEffect(() => setDraft(String(item.quantity)), [item.quantity])
   const valid = /^\d+$/.test(draft) && Number(draft) >= 1 && Number(draft) <= maxQuantity
   return (
-    <label>
+    <label className="grid gap-2 text-sm font-medium text-gray-800">
       Количество
-      <input
+      <Input
         type="number"
         data-testid="cart-item-qty"
         min="1"

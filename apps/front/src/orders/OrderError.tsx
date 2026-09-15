@@ -6,7 +6,11 @@ type Props = { error: string; problems: components['schemas']['ProblemProduct'][
 
 export function OrderError({ error, problems }: Props) {
   return (
-    <div role="alert" data-testid="order-error">
+    <div
+      className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700"
+      role="alert"
+      data-testid="order-error"
+    >
       <p>{error}</p>
       {problems.length > 0 && (
         <ul>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { Button, primaryLink } from '../shared/ui'
 import { useAuth } from './AuthProvider'
 import { authRequest } from './api'
 
@@ -14,7 +15,7 @@ export function AuthNavigation() {
   if (!user)
     return (
       <>
-        <Link to="/signup" data-testid="nav-signup">
+        <Link to="/signup" data-testid="nav-signup" className={`${primaryLink} order-last`}>
           Регистрация
         </Link>
         <Link to="/signin" data-testid="nav-signin">
@@ -40,14 +41,14 @@ export function AuthNavigation() {
       <Link to="/account" data-testid="nav-account">
         Личный кабинет
       </Link>
-      <button
+      <Button
         type="button"
         data-testid="nav-signout"
         disabled={pending}
         onClick={() => void signout()}
       >
         Выйти
-      </button>
+      </Button>
       {signoutError && <span role="alert">{signoutError}</span>}
     </>
   )

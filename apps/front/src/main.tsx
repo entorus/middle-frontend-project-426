@@ -15,7 +15,11 @@ if (!root) throw new Error('Не найден корневой элемент п
 createRoot(root).render(
   <StrictMode>
     <Sentry.ErrorBoundary
-      fallback={<p role="alert">Не удалось открыть приложение. Обновите страницу.</p>}
+      fallback={
+        <p className="text-sm text-red-600" role="alert">
+          Не удалось открыть приложение. Обновите страницу.
+        </p>
+      }
     >
       <BrowserRouter>
         <AuthProvider>
