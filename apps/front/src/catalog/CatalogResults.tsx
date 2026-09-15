@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
+
 import { Button } from '../shared/ui'
 import { useResource } from '../useResource'
 import { ProductCard } from './ProductCard'
+import { CatalogLoader, CatalogSkeleton } from './CatalogLoader'
 import type { ProductPage } from './types'
 
 export function CatalogResults({
@@ -11,8 +14,16 @@ export function CatalogResults({
   changePage: (page: number) => void
 }) {
   const result = useResource<ProductPage>(`/api/products?${queryString}`)
+  const [previous, setPrevious] = useState<ProductPage>()
+  useEffect(() => {
+    if (result.data) setPrevious(result.data)
+  }, [result.data])
+  const loading = !result.error && !result.data
+  // Keep the previous grid's exact height while filters are being refreshed.
+  const data = result.data ?? (loading ? previous : undefined)
   return (
-    <div className="min-w-0">
+    <div className="relative min-w-0">
+      {loading && <CatalogLoader />}
       {result.error && (
         <div role="alert" data-testid="catalog-error">
           <p>{result.error}</p>
@@ -21,17 +32,10 @@ export function CatalogResults({
           </Button>
         </div>
       )}
-      {!result.error && !result.data && (
-        <p className="py-2 text-sm text-gray-500" role="status">
-          Загружаем товары…
-        </p>
-      )}
-      {result.data && (
-        <p className="mb-4 text-xs text-gray-500" data-testid="catalog-total">
-          Найдено товаров: {result.data.total}
-        </p>
-      )}
-      {result.data?.items.length === 0 && (
+      <p className="mb-4 h-4 text-xs text-gray-500" data-testid="catalog-total">
+        {data ? `Найдено товаров: ${data.total}` : '\u00a0'}
+      </p>
+      {data?.items.length === 0 && (
         <p
           className="rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-500"
           data-testid="catalog-empty"
@@ -40,15 +44,17 @@ export function CatalogResults({
         </p>
       )}
       <div
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${loading ? 'opacity-50' : ''}`}
         data-testid="catalog-list"
-        aria-busy={!result.error && !result.data}
+        aria-busy={loading}
+        inert={loading}
       >
-        {result.data?.items.map((product) => (
+        {loading && !data && <CatalogSkeleton />}
+        {data?.items.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      {result.data && (
+      {(data || loading) && (
         <nav
           data-testid="catalog-pagination"
           className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-gray-500"
@@ -57,19 +63,19 @@ export function CatalogResults({
           <Button
             type="button"
             data-testid="catalog-page-prev"
-            disabled={result.data.page <= 1}
-            onClick={() => changePage(Math.max(1, result.data!.page - 1))}
+            disabled={loading || !data || data.page <= 1}
+            onClick={() => data && changePage(Math.max(1, data.page - 1))}
           >
             Назад
           </Button>
           <span data-testid="catalog-page-current">
-            Страница {result.data.page} из {Math.max(1, result.data.totalPages)}
+            {data ? `Страница ${data.page} из ${Math.max(1, data.totalPages)}` : 'Загрузка…'}
           </span>
           <Button
             type="button"
             data-testid="catalog-page-next"
-            disabled={result.data.page >= result.data.totalPages}
-            onClick={() => changePage(result.data!.page + 1)}
+            disabled={loading || !data || data.page >= data.totalPages}
+            onClick={() => data && changePage(data.page + 1)}
           >
             Далее
           </Button>

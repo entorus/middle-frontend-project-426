@@ -13,6 +13,46 @@ async function expectResults(page, request, query = '') {
   return result
 }
 
+test('loader сохраняет высоту сетки и положение пагинации при обновлении', async ({
+  page,
+  request,
+}) => {
+  const initial = Promise.withResolvers()
+  const refresh = Promise.withResolvers()
+  await page.route('**/api/products?*', async (route) => {
+    const response = await route.fetch()
+    const filtered = new URL(route.request().url()).searchParams.has('priceMin')
+    await (filtered ? refresh.promise : initial.promise)
+    await route.fulfill({ response })
+  })
+  try {
+    await page.goto('/catalog')
+    await expect(page.getByTestId('catalog-loader')).toBeVisible()
+    await expect(page.getByTestId('catalog-skeleton')).toHaveCount(12)
+    await expect(page.getByTestId('catalog-list')).toHaveAttribute('aria-busy', 'true')
+    initial.resolve()
+    await expectResults(page, request)
+    await expect(page.getByTestId('catalog-loader')).toHaveCount(0)
+    const grid = await page.getByTestId('catalog-list').boundingBox()
+    const pagination = await page.getByTestId('catalog-pagination').boundingBox()
+
+    await page.getByTestId('filter-price-min').fill('20000')
+    await expect(page.getByTestId('catalog-loader')).toBeVisible()
+    await expect(page.getByTestId('catalog-list')).toHaveAttribute('inert', '')
+    await expect(page.getByTestId('catalog-page-next')).toBeDisabled()
+    expect(await page.getByTestId('catalog-list').boundingBox()).toEqual(grid)
+    expect(await page.getByTestId('catalog-pagination').boundingBox()).toEqual(pagination)
+    refresh.resolve()
+    await expectResults(page, request, 'priceMin=20000')
+    await expect(page.getByTestId('catalog-loader')).toHaveCount(0)
+    await expect(page.getByTestId('catalog-list')).toHaveAttribute('aria-busy', 'false')
+    await expect(page.getByTestId('catalog-list')).not.toHaveAttribute('inert', '')
+  } finally {
+    initial.resolve()
+    refresh.resolve()
+  }
+})
+
 test('карточки содержат цену, наличие, изображение или заглушку и ссылку на товар', async ({
   page,
   request,
