@@ -2,12 +2,7 @@ import { Link } from 'react-router-dom'
 
 import type { components } from './generated/api'
 import { useResource } from './useResource'
-
-const currency = new Intl.NumberFormat('ru-RU', {
-  style: 'currency',
-  currency: 'RUB',
-  maximumFractionDigits: 0,
-})
+import { PromotionCard } from './home/PromotionCard'
 
 export default function Home() {
   const { data, error, retry } =
@@ -55,23 +50,7 @@ export default function Home() {
         )}
         <div className="home-promo-grid">
           {data?.map((promo) => (
-            <Link
-              key={promo.id}
-              to={`/products/${promo.product.id}`}
-              data-testid="home-promo-item"
-              className="home-promo-card"
-            >
-              <p className="eyebrow">{promo.product.category_name}</p>
-              <h3>{promo.title}</h3>
-              <p className="promo-text">{promo.text}</p>
-              <div className="promo-product">
-                <span>{promo.product.name}</span>
-                <strong>{currency.format(promo.product.price.amount / 100)}</strong>
-              </div>
-              <span className="promo-action">
-                Посмотреть товар <span aria-hidden="true">↗</span>
-              </span>
-            </Link>
+            <PromotionCard key={promo.id} promo={promo} />
           ))}
         </div>
       </section>

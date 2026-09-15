@@ -1,10 +1,10 @@
 import { Link, Route, Routes } from 'react-router-dom'
 
-import { AuthForm, AuthNavigation } from './auth'
+import { AuthForm, AuthNavigation, RequireAuth } from './auth'
 import { Catalog, ProductDetail } from './catalog'
 import Home from './Home'
 import { CartNavigation, CartPage } from './cart'
-import { AccountOrders, Checkout, OrderSuccess, RequireAuth } from './orders'
+import { AccountOrders, Checkout, OrderSuccess } from './orders'
 
 function MonitoringTest() {
   return (
