@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { Button } from '../shared/ui'
 import { useCart } from './CartProvider'
@@ -8,11 +8,16 @@ import type { components } from '../generated/api'
 
 type Product = components['schemas']['Product']
 
-export function AddToCart({ product }: { product: Product }) {
+export function AddToCart({ product, catalog = false }: { product: Product; catalog?: boolean }) {
+  const navigate = useNavigate()
   const { add, items, storageError } = useCart()
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
   const quantity = items.find((item) => item.id === product.id)?.quantity ?? 0
+  const inCart = quantity > 0
+  const opensCart = catalog && inCart
+  let label = 'В корзину'
+  if (catalog) label = inCart ? 'В корзине' : 'Купить'
   async function addProduct() {
     setError('')
     setPending(true)
@@ -27,16 +32,19 @@ export function AddToCart({ product }: { product: Product }) {
   return (
     <div className="mt-4 space-y-3">
       <Button
-        variant="primary"
-        className="w-full"
+        variant={catalog && inCart ? 'primaryOutline' : 'primary'}
+        className={catalog ? 'w-full border border-indigo-500' : 'w-full'}
         type="button"
         data-testid="product-add-to-cart"
-        disabled={!product.available || pending || quantity >= maxQuantity}
-        onClick={() => void addProduct()}
+        disabled={pending || (!opensCart && (!product.available || quantity >= maxQuantity))}
+        onClick={() => {
+          if (opensCart) navigate('/cart')
+          else void addProduct()
+        }}
       >
-        {pending ? 'Добавляем…' : 'В корзину'}
+        {pending ? 'Добавляем…' : label}
       </Button>
-      {quantity > 0 && (
+      {inCart && !catalog && (
         <p className="py-2 text-sm text-gray-500" role="status">
           В корзине: {quantity}. <Link to="/cart">Открыть корзину</Link>
         </p>

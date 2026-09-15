@@ -11,8 +11,8 @@ export function Quantity({ item }: { item: CartItem }) {
   useEffect(() => setDraft(String(item.quantity)), [item.quantity])
   const valid = /^\d+$/.test(draft) && Number(draft) >= 1 && Number(draft) <= maxQuantity
   return (
-    <label className="grid gap-2 text-sm font-medium text-gray-800">
-      Количество
+    <label className="grid w-20 gap-2 text-sm font-medium text-gray-800 sm:w-[90px]">
+      <span className="sr-only">Количество</span>
       <Input
         type="number"
         data-testid="cart-item-qty"

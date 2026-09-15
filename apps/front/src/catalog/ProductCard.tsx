@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ProductImage } from './ProductImage'
 import type { Product } from './types'
 import { formatMoney } from '../shared/money'
-import { softLink } from '../shared/ui'
+import { AddToCart } from '../cart'
 import { Availability } from './Availability'
 
 export function ProductCard({ product }: { product: Product }) {
@@ -29,9 +29,7 @@ export function ProductCard({ product }: { product: Product }) {
           </strong>
           <Availability available={product.available} testId="catalog-item-availability" />
         </div>
-        <Link to={`/products/${product.id}`} className={`${softLink} mt-3 w-full`}>
-          Подробнее
-        </Link>
+        <AddToCart product={product} catalog />
       </div>
     </article>
   )

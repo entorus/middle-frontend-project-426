@@ -18,6 +18,79 @@ async function addProduct(page, product) {
 }
 const storedCart = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('psparts-cart')))
 
+test('кнопка каталога меняется с Купить на В корзине без дополнительной подписи', async ({
+  page,
+}) => {
+  await page.goto('/catalog')
+  const card = page.getByTestId('catalog-item').first()
+  const button = card.getByTestId('product-add-to-cart')
+  await expect(button).toHaveText('Купить')
+  const border = await button.evaluate((element) => getComputedStyle(element).borderColor)
+  const height = (await card.boundingBox()).height
+  await button.click()
+  await expect(button).toHaveText('В корзине')
+  await expect(button).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  await expect(button).toHaveCSS('color', border)
+  await expect(button).toHaveCSS('border-color', border)
+  await expect(card.getByText(/В корзине:/)).toHaveCount(0)
+  await expect(card.getByRole('link', { name: 'Открыть корзину' })).toHaveCount(0)
+  expect((await card.boundingBox()).height).toBe(height)
+  await page.reload()
+  await expect(button).toHaveText('В корзине')
+  await button.click()
+  await expect(page).toHaveURL(/\/cart$/)
+  await expect(page.getByTestId('cart-item-qty')).toHaveValue('1')
+  await page.getByTestId('cart-item-remove').click()
+  await page.getByTestId('nav-catalog').click()
+  await expect(button).toHaveText('Купить')
+})
+
+for (const path of ['/', '/catalog']) {
+  test(`${path}: кнопка карточки добавляет товар без перехода на его страницу`, async ({
+    page,
+  }) => {
+    await page.goto(path)
+    await expect(page.getByRole('link', { name: 'Комплектующие', exact: true })).toBeVisible()
+    const button = page.getByTestId('product-add-to-cart').first()
+    await expect(button).toBeEnabled()
+    await button.click()
+    await expect(page.getByTestId('nav-cart')).toContainText('1')
+    expect(new URL(page.url()).pathname).toBe(path)
+    await page.getByTestId('nav-cart').click()
+    await expect(page.getByTestId('cart-item')).toHaveCount(1)
+    await expect(page.getByTestId('cart-item-qty')).toHaveValue('1')
+    await expect(page.getByRole('button', { name: 'Обновить цены и наличие' })).toHaveCount(0)
+  })
+}
+
+test('строка корзины и блок итога соответствуют desktop и mobile раскладке', async ({
+  page,
+  request,
+}) => {
+  const product = await productFrom(request)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await addProduct(page, product)
+  await page.getByTestId('nav-cart').click()
+  const row = page.getByTestId('cart-item')
+  const summary = page.getByTestId('cart-summary')
+  await expect(row.getByTestId('product-illustration')).toBeVisible()
+  await row.getByTestId('cart-item-qty').fill('2')
+  await expect(row.getByTestId('cart-item-total')).toHaveText(rubles(product.price.amount * 2))
+  await expect(page.getByTestId('cart-count')).toHaveText('2')
+  await expect(page.getByTestId('cart-total')).toHaveText(rubles(product.price.amount * 2))
+  const desktopRow = await row.boundingBox()
+  const desktopSummary = await summary.boundingBox()
+  expect(desktopRow.x + desktopRow.width).toBeLessThan(desktopSummary.x)
+  expect(desktopRow.y).toBe(desktopSummary.y)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const mobileRow = await row.boundingBox()
+  const mobileSummary = await summary.boundingBox()
+  expect(mobileRow.y + mobileRow.height).toBeLessThan(mobileSummary.y)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  )
+})
+
 test('цена и итог сохраняют копейки без округления до рублей', async ({ page, request }) => {
   const original = await productFrom(request)
   const product = { ...original, price: { amount: 12345, currency: 'RUB' } }

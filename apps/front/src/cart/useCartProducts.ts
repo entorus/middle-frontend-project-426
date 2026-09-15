@@ -48,6 +48,5 @@ export function useCartProducts(items: CartItem[]) {
   }, [ids, attempt])
   return {
     products: result.ids === ids ? result.products : {},
-    refresh: () => setAttempt((value) => value + 1),
   }
 }

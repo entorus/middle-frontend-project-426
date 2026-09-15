@@ -5,6 +5,7 @@ const focus =
 const buttonBase = `inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${focus}`
 const buttonVariants = {
   primary: 'bg-indigo-500 text-white hover:bg-indigo-600',
+  primaryOutline: 'border border-indigo-500 bg-white text-indigo-500 hover:bg-white',
   secondary: 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50',
   soft: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200',
 }

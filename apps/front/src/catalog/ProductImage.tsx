@@ -6,12 +6,25 @@ const categoryColors: Record<string, string> = {
   memory: 'bg-emerald-50 text-emerald-700',
 }
 
-export function ProductImage({ product, large = false }: { product: Product; large?: boolean }) {
-  const size = large ? 'h-72 sm:h-96' : 'h-44'
+export function ProductImage({
+  product,
+  large = false,
+  compact = false,
+}: {
+  product: Product
+  large?: boolean
+  compact?: boolean
+}) {
+  const regularSize = large ? 'h-72 sm:h-96' : 'h-44'
+  const size = compact ? 'h-24 w-24 shrink-0' : `${regularSize} w-full`
+  const regularTitle = large ? 'text-base sm:text-xl' : 'text-xs'
+  const titleSize = compact ? 'text-[5px]' : regularTitle
+  const regularCategory = large ? 'text-sm' : 'text-xs'
+  const categorySize = compact ? 'text-[4px]' : regularCategory
   const colors = categoryColors[product.category_slug] ?? 'bg-amber-50 text-amber-700'
   return (
     <div
-      className={`${size} ${colors} grid w-full place-items-center overflow-hidden p-2`}
+      className={`${size} ${colors} grid place-items-center overflow-hidden p-2`}
       role="img"
       aria-label={`${product.name} — ${product.category_name}`}
       data-testid="product-illustration"
@@ -22,15 +35,11 @@ export function ProductImage({ product, large = false }: { product: Product; lar
           <use href="/images/product-chip.svg#chip" />
         </svg>
         <div className="absolute inset-x-[27%] top-[28%] flex h-[37%] items-center justify-center px-1 text-center">
-          <span
-            className={`${large ? 'text-base sm:text-xl' : 'text-xs'} font-bold leading-tight wrap-anywhere`}
-          >
+          <span className={`${titleSize} font-bold leading-tight wrap-anywhere`}>
             {product.name}
           </span>
         </div>
-        <span
-          className={`absolute inset-x-2 bottom-0 text-center ${large ? 'text-sm' : 'text-xs'} opacity-70`}
-        >
+        <span className={`absolute inset-x-2 bottom-0 text-center ${categorySize} opacity-70`}>
           {product.category_name}
         </span>
       </div>

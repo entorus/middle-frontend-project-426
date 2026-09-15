@@ -34,7 +34,7 @@ export default function App() {
             to="/"
             className="inline-flex shrink-0 items-center gap-2 text-base font-bold tracking-tight text-gray-900"
           >
-            <span className="size-2 rounded-sm bg-indigo-500" aria-hidden="true" /> PS Parts
+            <span className="size-2 rounded-sm bg-indigo-500" aria-hidden="true" /> Комплектующие
           </Link>
           <nav
             className="flex flex-wrap items-center gap-4 text-sm text-gray-600"
