@@ -31,6 +31,19 @@ export async function hydrateOrders(db: Knex, headers: Header[]): Promise<Order[
       headers.map((order) => order.id),
     )
     .orderBy('id')
+  const itemsByOrder = new Map<number, Order['items']>()
+  for (const item of items) {
+    const orderItems = itemsByOrder.get(item.order_id) ?? []
+    const price = Number(item.price_kopecks)
+    orderItems.push({
+      productId: item.product_id,
+      name: item.name,
+      quantity: item.quantity,
+      price: money(price),
+      total: money(price * item.quantity),
+    })
+    itemsByOrder.set(item.order_id, orderItems)
+  }
   return headers.map((header) => ({
     id: header.id,
     status: header.status,
@@ -45,14 +58,6 @@ export async function hydrateOrders(db: Knex, headers: Header[]): Promise<Order[
           }
         : { method: 'pickup', name: header.recipient_name, phone: header.phone },
     total: money(Number(header.total_kopecks)),
-    items: items
-      .filter((item) => item.order_id === header.id)
-      .map((item) => ({
-        productId: item.product_id,
-        name: item.name,
-        quantity: item.quantity,
-        price: money(Number(item.price_kopecks)),
-        total: money(Number(item.price_kopecks) * item.quantity),
-      })),
+    items: itemsByOrder.get(header.id) ?? [],
   }))
 }

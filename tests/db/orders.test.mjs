@@ -106,6 +106,25 @@ test('заказы: серверная цена, атомарность, сни�
     assert.equal(order.status, 'paid')
     assert.equal(order.receiving.method, 'pickup')
     assert.equal('address' in order.receiving, false)
+    await tx('products').where('id', unavailable.id).update({ available: true })
+    const nextResponse = await post({
+      items: [
+        { id: unavailable.id, quantity: 2 },
+        { id: product.id, quantity: 3 },
+      ],
+      receiving: { ...receiving, method: 'delivery', address: 'Тестовый адрес' },
+    })
+    assert.equal(nextResponse.statusCode, 201, nextResponse.body)
+    const nextOrder = nextResponse.json()
+    assert.deepEqual(
+      nextOrder.items.map((item) => [item.productId, item.quantity, item.total.amount]),
+      [
+        [unavailable.id, 2, unavailable.price_kopecks * 2],
+        [product.id, 3, product.price_kopecks * 3],
+      ],
+    )
+    assert.equal(nextOrder.total.amount, unavailable.price_kopecks * 2 + product.price_kopecks * 3)
+    assert.equal(nextOrder.receiving.address, 'Тестовый адрес')
     await tx('products')
       .where('id', product.id)
       .update({ name: 'Новое название', price_kopecks: 1, available: false })
@@ -123,7 +142,7 @@ test('заказы: серверная цена, атомарность, сни�
     const others = await app.inject({ url: '/api/orders', headers: { cookie: second.cookie } })
     assert.deepEqual(others.json(), [])
     const mine = await app.inject({ url: '/api/orders', headers: { cookie: first.cookie } })
-    assert.deepEqual(mine.json(), [order])
+    assert.deepEqual(mine.json(), [nextOrder, order], 'Порядок и позиции заказов не смешиваются')
     const csrf = await app.inject({
       method: 'POST',
       url: '/api/orders',

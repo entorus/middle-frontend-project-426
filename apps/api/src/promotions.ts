@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import type { Knex } from 'knex'
 
-import { selectProducts, toProduct } from './catalog'
-import type { ProductRow } from './catalog'
+import { selectProducts, toProduct } from './catalog/products'
+import type { ProductRow } from './catalog/products'
 import { routeSchemas } from './generated/schemas'
 import type { components } from './generated/api'
 

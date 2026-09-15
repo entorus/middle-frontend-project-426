@@ -18,6 +18,20 @@ async function addProduct(page, product) {
 }
 const storedCart = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('psparts-cart')))
 
+test('цена и итог сохраняют копейки без округления до рублей', async ({ page, request }) => {
+  const original = await productFrom(request)
+  const product = { ...original, price: { amount: 12345, currency: 'RUB' } }
+  await page.route(`**/api/products/${product.id}`, (route) => route.fulfill({ json: product }))
+  await page.goto(`/products/${product.id}`)
+  await expect(page.getByTestId('product-price')).toHaveText('123,45 ₽')
+  await page.getByTestId('product-add-to-cart').click()
+  await expect(page.getByTestId('nav-cart')).toContainText('1')
+  await page.getByTestId('nav-cart').click()
+  await expect(page.getByTestId('cart-total')).toHaveText('123,45 ₽')
+  await page.getByTestId('cart-item-qty').fill('3')
+  await expect(page.getByTestId('cart-total')).toHaveText('370,35 ₽')
+})
+
 test('карточка показывает товар, добавление сохраняет только id и quantity', async ({
   page,
   request,

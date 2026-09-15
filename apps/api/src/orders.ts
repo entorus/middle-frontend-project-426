@@ -1,7 +1,8 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 import type { Knex } from 'knex'
 
-import { requireUser, validateOrigin } from './auth'
+import { requireUser } from './auth/session'
+import { validateOrigin } from './auth/validateOrigin'
 import { HttpError } from './contract'
 import { routeSchemas } from './generated/schemas'
 import type { components } from './generated/api'
