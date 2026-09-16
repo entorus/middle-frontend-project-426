@@ -25,7 +25,7 @@ export function PromotionCard({ promo }: { promo: components['schemas']['Promoti
         </div>
       </Link>
       <div className="px-4 pb-4">
-        <AddToCart product={promo.product} />
+        <AddToCart product={promo.product} testId="home-promo-add-to-cart" />
       </div>
     </article>
   )

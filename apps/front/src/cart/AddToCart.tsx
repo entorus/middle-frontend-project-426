@@ -8,7 +8,15 @@ import type { components } from '../generated/api'
 
 type Product = components['schemas']['Product']
 
-export function AddToCart({ product, catalog = false }: { product: Product; catalog?: boolean }) {
+export function AddToCart({
+  product,
+  catalog = false,
+  testId = 'product-add-to-cart',
+}: {
+  product: Product
+  catalog?: boolean
+  testId?: 'product-add-to-cart' | 'catalog-add-to-cart' | 'home-promo-add-to-cart'
+}) {
   const navigate = useNavigate()
   const { add, items, storageError } = useCart()
   const [pending, setPending] = useState(false)
@@ -35,7 +43,7 @@ export function AddToCart({ product, catalog = false }: { product: Product; cata
         variant={catalog && inCart ? 'primaryOutline' : 'primary'}
         className={catalog ? 'w-full border border-indigo-500' : 'w-full'}
         type="button"
-        data-testid="product-add-to-cart"
+        data-testid={testId}
         disabled={pending || (!opensCart && (!product.available || quantity >= maxQuantity))}
         onClick={() => {
           if (opensCart) navigate('/cart')

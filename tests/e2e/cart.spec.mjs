@@ -23,7 +23,7 @@ test('кнопка каталога меняется с Купить на В к�
 }) => {
   await page.goto('/catalog')
   const card = page.getByTestId('catalog-item').first()
-  const button = card.getByTestId('product-add-to-cart')
+  const button = card.getByTestId('catalog-add-to-cart')
   await expect(button).toHaveText('Купить')
   const border = await button.evaluate((element) => getComputedStyle(element).borderColor)
   const height = (await card.boundingBox()).height
@@ -51,7 +51,10 @@ for (const path of ['/', '/catalog']) {
   }) => {
     await page.goto(path)
     await expect(page.getByRole('link', { name: 'Комплектующие', exact: true })).toBeVisible()
-    const button = page.getByTestId('product-add-to-cart').first()
+    await expect(page.getByTestId('product-add-to-cart')).toHaveCount(0)
+    const button = page
+      .getByTestId(path === '/' ? 'home-promo-add-to-cart' : 'catalog-add-to-cart')
+      .first()
     await expect(button).toBeEnabled()
     await button.click()
     await expect(page.getByTestId('nav-cart')).toContainText('1')

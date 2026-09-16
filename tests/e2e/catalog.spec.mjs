@@ -13,6 +13,18 @@ async function expectResults(page, request, query = '') {
   return result
 }
 
+test('селектор кнопки страницы товара не пересекается с кнопками каталога', async ({ page }) => {
+  await page.goto('/catalog')
+  await expect(page.getByTestId('catalog-add-to-cart').first()).toBeVisible()
+  await expect(page.getByTestId('product-add-to-cart')).toHaveCount(0)
+  await page.getByTestId('catalog-item-name').first().click()
+  // The external checker waits for this selector immediately after clicking the product link.
+  await expect(page.getByTestId('product-add-to-cart')).toBeVisible()
+  await expect(page.getByTestId('product-add-to-cart')).toHaveCount(1)
+  await expect(page.getByTestId('product-name')).toBeVisible()
+  await expect(page.getByTestId('catalog-add-to-cart')).toHaveCount(0)
+})
+
 test('loader сохраняет высоту сетки и положение пагинации при обновлении', async ({
   page,
   request,

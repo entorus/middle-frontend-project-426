@@ -29,7 +29,7 @@ export function ProductCard({ product }: { product: Product }) {
           </strong>
           <Availability available={product.available} testId="catalog-item-availability" />
         </div>
-        <AddToCart product={product} catalog />
+        <AddToCart product={product} catalog testId="catalog-add-to-cart" />
       </div>
     </article>
   )
